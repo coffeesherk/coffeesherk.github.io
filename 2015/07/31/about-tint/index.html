@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="谈谈Android Material Design 中的Tint（着色）"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>谈谈Android Material Design 中的Tint（着色） - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            谈谈Android Material Design 中的Tint（着色）
+            
+          </h1>
+          <p class="posted-on">
+          2015-07-31
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>当我开始接触<code>Tint</code>这个词的时候，其实是蛮不理解它的意思的，以及并不清楚Google发明它的目的，它一般搭配<code>Background</code>配合使用，但是现在已经有了<code>Background</code>，为什么还需要<code>Tint</code>呢？</p>
+<a id="more"></a>
+<blockquote>
+<p>Tint 翻译为<code>着色</code>。</p>
+</blockquote>
+<p>着色，着什么色呢？和背景有关，当然是着背景的色。当我开发客户端，使用了<code>appcompat-v7</code>包的时候，为了实现<code>Material Design</code>的效果，我们会去设置主题里的几个颜色，重要的比如<code>primaryColor</code>，<code>colorControlNormal</code>，<code>colorControlActived</code> 等等，而我们使用的一些组件，比如<code>EditText</code>就会自动变成我们想要的背景颜色，在背景图只有一张的情况下，这样的做法极大的减少了我们apk包的大小。</p>
+<p><strong>实现的方式就是用一个颜色为我们的背景图片设置<code>tint</code>（着色）。</strong></p>
+<h1 id="例子："><a href="#例子：" class="headerlink" title="例子："></a>例子：</h1><p><img src="https://segmentfault.com/img/bVmUB9" alt="clipboard.png"></p>
+<p>看看即将发布的<code>SegmentFault for Android 2.7</code>中，发布问题功能，这个EditText的颜色和我们的主要颜色相同。它利用了<code>TintManager</code>这个类，为自己的背景进行着色（绿色）。<br>那么这个原始图是什么样子呢？我们从<code>appcompat-v7</code>包中找到了这个图，是一个<code>.9</code>图，样子如下：</p>
+<p><img src="https://segmentfault.com/img/bVmUCi" alt="clipboard.png"><br>其实它只是一个黑色的条，通过绿色的着色，变成了一个绿色的条。  就是这样的设计方式，使得我们在<code>Material Design</code>中省了多少资源文件呀！</p>
+<p>好了，既然理解了<code>tint</code>的含义，我们赶紧看下这一切是如何实现的吧。<br>其实底层特别简单，了解过渲染的同学应该知道<code>PorterDuffColorFilter</code>这个东西，我们使用<code>SRC_IN</code>的方式，对这个Drawable进行颜色方面的渲染，就是在这个Drawable中有像素点的地方，再用我们的过滤器着色一次。<br>实际上如果要我们自己实现，只用获取<code>View</code>的<code>backgroundDrawable</code>之后，设置下<code>colorFilter</code>即可。</p>
+<p>看下最核心的代码就这么几行<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (filter == <span class="keyword">null</span>) &#123;</div><div class="line">    <span class="comment">// Cache miss, so create a color filter and add it to the cache</span></div><div class="line">    filter = <span class="keyword">new</span> PorterDuffColorFilter(color, mode);</div><div class="line">&#125;</div><div class="line"></div><div class="line">d.setColorFilter(filter);</div></pre></td></tr></table></figure></p>
+<p>通常情况下，我们的mode一般都是<code>SRC_IN</code>，如果想了解这个属性相关的资料，这里是传送门： <a href="http://blog.csdn.net/t12x3456/article/details/10432935" target="_blank" rel="external">http://blog.csdn.net/t12x3456/article/details/10432935</a> （中文）</p>
+<p>由于<code>API Level 21</code>以前不支持<code>background tint</code>在xml中设置，于是提供了<code>ViewCompat.setBackgroundTintList</code>方法和<code>ViewCompat.setBackgroundTintMode</code>用来手动更改需要着色的颜色，但要求相关的View继承<code>TintableBackgroundView</code>接口。</p>
+<h1 id="源码解析"><a href="#源码解析" class="headerlink" title="源码解析"></a>源码解析</h1><p>看下源码是如何实现的吧，我们以<code>AppCompatEditText</code>为例：<br>看下构造函数（省略无关代码）<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">AppCompatEditText</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>(TintContextWrapper.wrap(context), attrs, defStyleAttr);</div><div class="line"></div><div class="line">    ...</div><div class="line">   </div><div class="line">    ColorStateList tint = a.getTintManager().getTintList(a.getResourceId(<span class="number">0</span>, -<span class="number">1</span>)); <span class="comment">//根据背景的resource id获取内置的着色颜色。</span></div><div class="line">    <span class="keyword">if</span> (tint != <span class="keyword">null</span>) &#123;</div><div class="line">        setInternalBackgroundTint(tint); <span class="comment">//设置着色</span></div><div class="line">    &#125;</div><div class="line">   </div><div class="line">    ...</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">setInternalBackgroundTint</span><span class="params">(ColorStateList tint)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (tint != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">if</span> (mInternalBackgroundTint == <span class="keyword">null</span>) &#123;</div><div class="line">            mInternalBackgroundTint = <span class="keyword">new</span> TintInfo();</div><div class="line">        &#125;</div><div class="line">        mInternalBackgroundTint.mTintList = tint;</div><div class="line">        mInternalBackgroundTint.mHasTintList = <span class="keyword">true</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        mInternalBackgroundTint = <span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//上面的代码是记录tint相关的信息。</span></div><div class="line">    applySupportBackgroundTint();  <span class="comment">//对背景应用tint</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">applySupportBackgroundTint</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (getBackground() != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">if</span> (mBackgroundTint != <span class="keyword">null</span>) &#123;</div><div class="line">            TintManager.tintViewBackground(<span class="keyword">this</span>, mBackgroundTint);</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mInternalBackgroundTint != <span class="keyword">null</span>) &#123;</div><div class="line">            TintManager.tintViewBackground(<span class="keyword">this</span>, mInternalBackgroundTint); <span class="comment">//最重要的，对tint进行应用</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后我们进入<code>tintViewBackground</code>看下<code>TintManager</code>里面的源码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">tintViewBackground</span><span class="params">(View view, TintInfo tint)</span> </span>&#123;</div><div class="line">    <span class="keyword">final</span> Drawable background = view.getBackground();</div><div class="line">    <span class="keyword">if</span> (tint.mHasTintList) &#123;</div><div class="line">        <span class="comment">//如果设置了tint的话，对背景设置PorterDuffColorFilter</span></div><div class="line">        setPorterDuffColorFilter(</div><div class="line">                background,</div><div class="line">                tint.mTintList.getColorForState(view.getDrawableState(),</div><div class="line">                        tint.mTintList.getDefaultColor()),</div><div class="line">                tint.mHasTintMode ? tint.mTintMode : <span class="keyword">null</span>);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        background.clearColorFilter();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &lt;= <span class="number">10</span>) &#123;</div><div class="line">        <span class="comment">// On Gingerbread, GradientDrawable does not invalidate itself when it's ColorFilter</span></div><div class="line">        <span class="comment">// has changed, so we need to force an invalidation</span></div><div class="line">        view.invalidate();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setPorterDuffColorFilter</span><span class="params">(Drawable d, <span class="keyword">int</span> color, PorterDuff.Mode mode)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (mode == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">// If we don't have a blending mode specified, use our default</span></div><div class="line">        mode = DEFAULT_MODE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// First, lets see if the cache already contains the color filter</span></div><div class="line">    PorterDuffColorFilter filter = COLOR_FILTER_CACHE.get(color, mode);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (filter == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">// Cache miss, so create a color filter and add it to the cache</span></div><div class="line">        filter = <span class="keyword">new</span> PorterDuffColorFilter(color, mode);</div><div class="line">        COLOR_FILTER_CACHE.put(color, mode, filter);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="comment">// 最最重要，原来是对background drawable设置了colorFilter 完成了我们要的功能。</span></div><div class="line">    d.setColorFilter(filter);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上是对API21以下的兼容。<br>如果我们要实现自己的<code>AppCompat</code>组件实现<code>tint</code>的一些特性的话，我们就可以指定好<code>ColorStateList</code>，利用<code>TintManager</code>对自己的背景进行着色，当然需要对外开放设置的接口的话，我们还要实现<code>TintableBackgroundView</code>接口，然后用<code>ViewCompat.setBackgroundTintList</code>进行设置，这样能完成对v7以上所有版本的兼容。</p>
+<h1 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h1><p>比如我现在要对一个自定义组件实现对<code>Tint</code>的支持，其实只用继承下，加一些代码就好了，代码如下（几乎通用）：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div></pre></td><td class="code"><pre><div class="line">public class AppCompatFlowLayout extends FlowLayout implements TintableBackgroundView &#123;</div><div class="line"></div><div class="line">    private static final int[] TINT_ATTRS = &#123;</div><div class="line">            android.R.attr.background</div><div class="line">    &#125;;</div><div class="line"></div><div class="line">    private TintInfo mInternalBackgroundTint;</div><div class="line">    private TintInfo mBackgroundTint;</div><div class="line">    private TintManager mTintManager;</div><div class="line"></div><div class="line">    public AppCompatFlowLayout(Context context) &#123;</div><div class="line">        this(context, null);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public AppCompatFlowLayout(Context context, AttributeSet attributeSet) &#123;</div><div class="line">        this(context, attributeSet, 0);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public AppCompatFlowLayout(Context context, AttributeSet attributeSet, int defStyle) &#123;</div><div class="line">        super(context, attributeSet, defStyle);</div><div class="line"></div><div class="line">        if (TintManager.SHOULD_BE_USED) &#123;</div><div class="line">            TintTypedArray a = TintTypedArray.obtainStyledAttributes(getContext(), attributeSet,</div><div class="line">                    TINT_ATTRS, defStyle, 0);</div><div class="line">            if (a.hasValue(0)) &#123;</div><div class="line">                ColorStateList tint = a.getTintManager().getTintList(a.getResourceId(0, -1));</div><div class="line">                if (tint != null) &#123;</div><div class="line">                    setInternalBackgroundTint(tint);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            mTintManager = a.getTintManager();</div><div class="line">            a.recycle();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void applySupportBackgroundTint() &#123;</div><div class="line">        if (getBackground() != null) &#123;</div><div class="line">            if (mBackgroundTint != null) &#123;</div><div class="line">                TintManager.tintViewBackground(this, mBackgroundTint);</div><div class="line">            &#125; else if (mInternalBackgroundTint != null) &#123;</div><div class="line">                TintManager.tintViewBackground(this, mInternalBackgroundTint);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void drawableStateChanged() &#123;</div><div class="line">        super.drawableStateChanged();</div><div class="line">        applySupportBackgroundTint();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void setInternalBackgroundTint(ColorStateList tint) &#123;</div><div class="line">        if (tint != null) &#123;</div><div class="line">            if (mInternalBackgroundTint == null) &#123;</div><div class="line">                mInternalBackgroundTint = new TintInfo();</div><div class="line">            &#125;</div><div class="line">            mInternalBackgroundTint.mTintList = tint;</div><div class="line">            mInternalBackgroundTint.mHasTintList = true;</div><div class="line">        &#125; else &#123;</div><div class="line">            mInternalBackgroundTint = null;</div><div class="line">        &#125;</div><div class="line">        applySupportBackgroundTint();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void setSupportBackgroundTintList(ColorStateList tint) &#123;</div><div class="line">        if (mBackgroundTint == null) &#123;</div><div class="line">            mBackgroundTint = new TintInfo();</div><div class="line">        &#125;</div><div class="line">        mBackgroundTint.mTintList = tint;</div><div class="line">        mBackgroundTint.mHasTintList = true;</div><div class="line"></div><div class="line">        applySupportBackgroundTint();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public ColorStateList getSupportBackgroundTintList() &#123;</div><div class="line">        return mBackgroundTint != null ? mBackgroundTint.mTintList : null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void setSupportBackgroundTintMode(PorterDuff.Mode tintMode) &#123;</div><div class="line">        if (mBackgroundTint == null) &#123;</div><div class="line">            mBackgroundTint = new TintInfo();</div><div class="line">        &#125;</div><div class="line">        mBackgroundTint.mTintMode = tintMode;</div><div class="line">        mBackgroundTint.mHasTintMode = true;</div><div class="line"></div><div class="line">        applySupportBackgroundTint();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public PorterDuff.Mode getSupportBackgroundTintMode() &#123;</div><div class="line">        return mBackgroundTint != null ? mBackgroundTint.mTintMode : null;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>赶快去试试吧~</p>
+<blockquote>
+<p>欢迎关注我<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a> 以及 <a href="http://weibo.com/coffeesherk/home?leftnav=1" target="_blank" rel="external">@Gemini</a> </p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-about-tint';
+          this.page.title = '谈谈Android Material Design 中的Tint（着色）';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/08/04/about-skip-list/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/07/13/learn-kotlin/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/07/31/about-tint/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

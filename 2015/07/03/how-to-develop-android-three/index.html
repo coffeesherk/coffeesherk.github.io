@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="#土豆记事#教你开发Android App之 —— 真的开始写App了"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>#土豆记事#教你开发Android App之 —— 真的开始写App了 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            #土豆记事#教你开发Android App之 —— 真的开始写App了
+            
+          </h1>
+          <p class="posted-on">
+          2015-07-03
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <h1 id="基础界面"><a href="#基础界面" class="headerlink" title="基础界面"></a>基础界面</h1><p>我们要开发的App界面如下</p>
+<p><img src="https://segmentfault.com/img/bVmzuq" alt="clipboard.png"></p>
+<blockquote>
+<ol>
+<li>有一个title</li>
+<li>一个列表</li>
+<li>右下角一个按钮</li>
+</ol>
+</blockquote>
+<ol>
+<li>title 可以用系统自带的<code>ActionBar</code>实现（Lollipop以上为Toolbar）。</li>
+<li>下面的列表可以用<code>ListView</code>或者<code>android-support-compact-v7</code>提供的新的<code>RecyclerView</code>。展示一个列表。</li>
+<li>按钮可以使用普通的Button，我这里为了符合<code>Material Design</code>规范，使用了<code>FloatingActionButton</code>，没什么不同，只是展示出来的样式不一样而已。</li>
+</ol>
+<p>整个界面就这么简单。</p>
+<p>我们可以看到<code>Toolbar</code>以下的部分是列表和按钮，它们的排列不是属于线性排列，所以我们就想到用<code>RelativeLayout</code>布局 —— 列表占满空间，而按钮存在容器的右下角。<br>我们的布局文件就如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;match_parent&quot;</div><div class="line">    tools:context=&quot;.MainActivity&quot;&gt;</div><div class="line"></div><div class="line">    &lt;org.lifefortheorc.tudounotepad.widget.EmptyRecyclerView</div><div class="line">        android:id=&quot;@+id/recycler_note&quot;</div><div class="line">        android:layout_width=&quot;match_parent&quot;</div><div class="line">        android:layout_height=&quot;match_parent&quot; /&gt;</div><div class="line"></div><div class="line">    &lt;TextView</div><div class="line">        android:id=&quot;@+id/tv_empty&quot;</div><div class="line">        android:layout_width=&quot;match_parent&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;@string/empty&quot;</div><div class="line">        android:gravity=&quot;center&quot;</div><div class="line">        android:layout_centerInParent=&quot;true&quot; /&gt;</div><div class="line"></div><div class="line">    &lt;android.support.design.widget.FloatingActionButton</div><div class="line">        android:id=&quot;@+id/fab_add&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:layout_alignParentEnd=&quot;true&quot;</div><div class="line">        android:layout_alignParentBottom=&quot;true&quot;</div><div class="line">        android:layout_marginEnd=&quot;@dimen/activity_horizontal_margin&quot;</div><div class="line">        android:layout_marginBottom=&quot;@dimen/activity_vertical_margin&quot;</div><div class="line">        android:src=&quot;@drawable/ic_add&quot; /&gt;</div><div class="line"></div><div class="line">&lt;/RelativeLayout&gt;</div></pre></td></tr></table></figure></p>
+<p>这其中的<code>tv_empty</code>是我们用来做一个列表空内容的提醒的，触发的结果如下<br><strong>当列表不为空时隐藏，当列表为空时就显示</strong><br><img src="https://segmentfault.com/img/bVmzuO" alt="clipboard.png"></p>
+<h1 id="关于列表"><a href="#关于列表" class="headerlink" title="关于列表"></a>关于列表</h1><p>不管是<code>ListView</code>还是<code>RecylerView</code>，如果你熟悉<code>iOS</code>开发的话，会理解<code>item</code>重用的机制——<code>Android</code>为了省资源，只会创建一屏幕的<code>item</code>，如果你的列表项目数目大于一个屏幕，当你滚下列表时，系统会把顶上的<code>item</code>回收，在回调函数里提供给你重新使用，然后重新在底部显示出来，这样的好处是你创建的<code>item</code>不论你实际数据的大小，它至多只创建一个屏幕多的数量，能节省资源。</p>
+<p>列表、子视图和数据之间的交互使用了<code>适配器模式</code>，在<code>Adapter</code>中把你的数据渲染到<code>item view</code>上，然后应用给父视图。<br>关于<code>ListView</code>的介绍，请看传送门：<a href="http://developer.android.com/guide/topics/ui/layout/listview.html" target="_blank" rel="external">http://developer.android.com/guide/topics/ui/layout/listview.html</a></p>
+<p>如果你看懂了<code>ListView</code>，那么<code>RecylerView</code>只是对其的一种优化，使用了更多的自定义的属性和更方便自由的布局管理系统。</p>
+<p>我这里使用了<code>RecylerView</code>，我们来看下适配器的源码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div></pre></td><td class="code"><pre><div class="line">public class NoteAdapter extends RecyclerView.Adapter&lt;NoteAdapter.ViewHolder&gt; &#123;</div><div class="line"></div><div class="line">    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(&quot;yyyy年MM月dd日 HH:mm:ss&quot;);</div><div class="line"></div><div class="line">    private Context mContext;</div><div class="line">    private List&lt;NoteModel&gt; noteList;</div><div class="line"></div><div class="line">    public NoteAdapter(Context ctx) &#123;</div><div class="line">        this.noteList = new ArrayList&lt;&gt;();</div><div class="line">        this.mContext = ctx;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setNoteList(List&lt;NoteModel&gt; noteList) &#123;</div><div class="line">        //设置数据</div><div class="line">        this.noteList.clear();</div><div class="line">        this.noteList.addAll(noteList);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) &#123;</div><div class="line">        LayoutInflater layoutInflater = LayoutInflater.from(mContext);</div><div class="line">        View view = layoutInflater.inflate(R.layout.item_note, viewGroup, false);</div><div class="line">        //返回默认界面布局</div><div class="line">        return new ViewHolder(view);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void onBindViewHolder(ViewHolder viewHolder, int position) &#123;</div><div class="line">        NoteModel note = noteList.get(position);</div><div class="line"></div><div class="line">        String content = note.getContent();</div><div class="line">        long time = note.getTime();</div><div class="line"></div><div class="line">        //根据数据渲染界面</div><div class="line">        viewHolder.mTextViewContent.setText(content);</div><div class="line">        viewHolder.mTextViewTitle.setText(dateFormat.format(time));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void remove(int position) &#123;</div><div class="line">        NoteModel note = this.noteList.get(position);</div><div class="line">        note.delete();</div><div class="line">        this.noteList.remove(position);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int getItemCount() &#123;</div><div class="line">        return noteList.size();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener &#123;</div><div class="line">        @Bind(R.id.tv_title)</div><div class="line">        public TextView mTextViewTitle;</div><div class="line">        @Bind(R.id.tv_content)</div><div class="line">        public TextView mTextViewContent;</div><div class="line"></div><div class="line">        public ViewHolder(View itemView) &#123;</div><div class="line">            super(itemView);</div><div class="line">            ButterKnife.bind(this, itemView);</div><div class="line">            itemView.setOnClickListener(this);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public void onClick(View v) &#123;</div><div class="line">            int position = this.getAdapterPosition();</div><div class="line">            NoteModel note = noteList.get(position);</div><div class="line"></div><div class="line"></div><div class="line">            long id = note.getId();</div><div class="line">            Intent intent = new Intent(mContext, EditActivity.class);</div><div class="line">            intent.putExtra(&quot;id&quot;, id);</div><div class="line">            ActivityOptions options =  ActivityOptions.makeSceneTransitionAnimation((Activity) mContext,</div><div class="line">                    v, &quot;content&quot;);</div><div class="line">            mContext.startActivity(intent,</div><div class="line">                    options.toBundle());</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>靠这一套<code>Adapter</code>，<code>RecyclerView</code>就能一项一项渲染出我们要的列表了。</p>
+<h1 id="关于数据"><a href="#关于数据" class="headerlink" title="关于数据"></a>关于数据</h1><p>渲染界面少不了数据，我们创建数据的入口在右下角，点”+”号就可以跳转到新建的页面<br>代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent(this, EditActivity.class);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure></p>
+<p>两行即可搞定。</p>
+<p>我们跳转到新的界面</p>
+<p><img src="https://segmentfault.com/img/bVmzvt" alt="clipboard.png"><br>在这里用户可以输入想要的内容，点右上角的保存即可保存。保存到内存很简单，我们如何把数据持久化呢？<br>Android系统提供了<code>SQLite</code>来给我们持久化数据。<code>SQLite</code>是一种轻量级的文件关系型数据库，可以满足我们的需求，我们使用<code>SQLite</code>存储用户输入的数据，然后保存到本地，就是这样。</p>
+<blockquote>
+<p>关于Android中，<code>SQLite</code>的部分，可以看这个传送门：<a href="http://developer.android.com/training/basics/data-storage/databases.html" target="_blank" rel="external">http://developer.android.com/training/basics/data-storage/databases.html</a></p>
+</blockquote>
+<p>在这里，我们为了方便直接使用<code>ActiveAndroid</code>的ORM方案(<a href="http://www.activeandroid.com/)，可以" target="_blank" rel="external">http://www.activeandroid.com/)，可以</a><br>把<code>Model</code>直接持久化到数据库，然后从数据库中读取数据。<br>我们的模型如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">@Column(name = &quot;content&quot;)</div><div class="line">private String content;</div><div class="line"></div><div class="line">@Column(name = &quot;time&quot;)</div><div class="line">private long time;</div><div class="line"></div><div class="line">public String getContent() &#123;</div><div class="line">    return content;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setContent(String content) &#123;</div><div class="line">    this.content = content;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public long getTime() &#123;</div><div class="line">    return time;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setTime(long time) &#123;</div><div class="line">    this.time = time;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public static List&lt;NoteModel&gt; queryNoteList() &#123;</div><div class="line">    return new Select().from(NoteModel.class).execute();</div><div class="line">&#125;</div><div class="line"></div><div class="line">public static NoteModel queryById(long id) &#123;</div><div class="line">    return new Select().from(NoteModel.class)</div><div class="line">                       .where(&quot;Id = ?&quot;, id).executeSingle();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们记录用户存入的内容，存入的事件，然后定义两个方法——列出所有存着的列表和根据id查询其中一个对象，我们使用这两个方法就能获取到列表和详情两个数据。</p>
+<p>列表数据提供给首页，详情数据提供给编辑页面。这样就满足了一个记事本App的基础需求——增加与修改。</p>
+<p>列表页：</p>
+<p><img src="https://segmentfault.com/img/bVmzwd" alt="clipboard.png"></p>
+<p>详情页：</p>
+<p><img src="https://segmentfault.com/img/bVmzwe" alt="clipboard.png"></p>
+<p>如果对于写App入门还有什么问题，欢迎留言以及在<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a>上follow我</p>
+<blockquote>
+<p>本文提到的项目源码地址：<a href="https://github.com/geminiwen/tudounotepad" target="_blank" rel="external">https://github.com/geminiwen/tudounotepad</a><br>欢迎留言<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a>或者<a href="http://weibo.com/coffeesherk/home?wvr=5" target="_blank" rel="external">@geminiwen</a></p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-how-to-develop-android-three';
+          this.page.title = '#土豆记事#教你开发Android App之 —— 真的开始写App了';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/07/06/android-studio-file-structure/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/07/03/how-to-develop-android-two/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/07/03/how-to-develop-android-three/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

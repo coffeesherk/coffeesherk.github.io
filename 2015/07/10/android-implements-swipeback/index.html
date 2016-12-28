@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Android实现SwipeBack（右滑退出）效果"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Android实现SwipeBack（右滑退出）效果 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Android实现SwipeBack（右滑退出）效果
+            
+          </h1>
+          <p class="posted-on">
+          2015-07-10
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <h2 id="效果演示"><a href="#效果演示" class="headerlink" title="效果演示"></a>效果演示</h2><h3 id="初始状态"><a href="#初始状态" class="headerlink" title="初始状态"></a>初始状态</h3><p><img src="https://segmentfault.com/img/bVmEJE" alt="clipboard.png"></p>
+<h3 id="滑动中状态"><a href="#滑动中状态" class="headerlink" title="滑动中状态"></a>滑动中状态</h3><p><img src="https://segmentfault.com/img/bVmEJF" alt="clipboard.png"></p>
+<h3 id="结束状态"><a href="#结束状态" class="headerlink" title="结束状态"></a>结束状态</h3><p><img src="https://segmentfault.com/img/bVmEJK" alt="clipboard.png"></p>
+<p>这是目前实现在SegmentFault for Android v2.6中的效果。<br>一切一切的之前，感谢 <a href="https://github.com/ikew0ng/SwipeBackLayout" target="_blank" rel="external">ikew0ng/SwipeBackLayout</a><br>我使用这个库，并经过一些修改，支持了Android 4.0以上所有的版本。<br>我们来分析下<code>SwipeBackLayout</code>的源码</p>
+<h2 id="一些修改"><a href="#一些修改" class="headerlink" title="一些修改"></a>一些修改</h2><p>我之前做过实验，碰到的最大问题是上层的Activity底下并不是透明的，因此看不见下层Activity的视图。<br>在<code>SwipeBackLayout</code>中采用的方案是使用一个叫<code>convertToTranslucent</code>的未公开的api，再配合<code>theme</code>中<br>把<code>windowIsTranslucent</code>设置为<code>true</code>，即可实现上层的<code>Window</code>背景为透明。</p>
+<p>这里要注意的地方是调用<code>convertToTranslucent</code>可以使用反射的方法进行调用，但是在<code>Lollipop</code>中，它的参数变成了两个，而在5.0以下是一个参数，所以需要在源码中对<code>Util.convertActivityToTranslucent</code>这个方法进行一些修改。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">convertActivityToTranslucent</span><span class="params">(Activity activity)</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        Class[] t = Activity.class.getDeclaredClasses();</div><div class="line">        Class translucentConversionListenerClazz = <span class="keyword">null</span>;</div><div class="line">        Class[] method = t;</div><div class="line">        <span class="keyword">int</span> len$ = t.length;</div><div class="line"></div><div class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i$ = <span class="number">0</span>; i$ &lt; len$; ++i$) &#123;</div><div class="line">            Class clazz = method[i$];</div><div class="line">            <span class="keyword">if</span>(clazz.getSimpleName().contains(<span class="string">"TranslucentConversionListener"</span>)) &#123;</div><div class="line">                translucentConversionListenerClazz = clazz;</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.LOLLIPOP) &#123;</div><div class="line">            Method var8 = Activity.class.getDeclaredMethod(<span class="string">"convertToTranslucent"</span>, translucentConversionListenerClazz, ActivityOptions.class);</div><div class="line">            var8.setAccessible(<span class="keyword">true</span>);</div><div class="line">            var8.invoke(activity, <span class="keyword">new</span> Object[]&#123;<span class="keyword">null</span>, <span class="keyword">null</span>&#125;);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            Method var8 = Activity.class.getDeclaredMethod(<span class="string">"convertToTranslucent"</span>, translucentConversionListenerClazz);</div><div class="line">            var8.setAccessible(<span class="keyword">true</span>);</div><div class="line">            var8.invoke(activity, <span class="keyword">new</span> Object[]&#123;<span class="keyword">null</span>&#125;);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>使得能适配4.0 - 5.0+所有的设备</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>我们可以看它的源码可以知道，它是利用<code>ViewDragHelper</code>对View进行拖移效果的，<code>ViewDragHelper</code>主要帮助我们完成了对速度、加速度以及释放后的一些逻辑的设置，大大简化了我们对触摸事件的处理。<br>我们看下<code>SwipeBackLayout</code>是如何嵌入到我们要的<code>Activity</code>里去的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"> public void attachToActivity(Activity activity) &#123;</div><div class="line">    this.mActivity = activity;</div><div class="line">    // .... 省略部分代码</div><div class="line">    ViewGroup decor = (ViewGroup)activity.getWindow().getDecorView();</div><div class="line">    ViewGroup decorChild = (ViewGroup)decor.getChildAt(0);</div><div class="line">    decorChild.setBackgroundResource(background);</div><div class="line">    decor.removeView(decorChild);</div><div class="line">    this.addView(decorChild);</div><div class="line">    this.setContentView(decorChild);</div><div class="line">    decor.addView(this);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们可以看到，本来<code>Activity</code>调用<code>setContentView</code>之后，会把我们要的<code>layout</code>加到<code>window</code>的<code>decorView</code>上，我们在这里把<code>window</code>中的<code>decorView</code>的子元素改成<code>SwipeBackLayout</code>，然后把原先的<code>contentView</code>加到<code>decorView</code>下，使得<code>ViewDragHelper</code>附着在<code>SwipeBackLayout</code>上。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">this.mDragHelper = ViewDragHelper.create(this, new SwipeBackLayout.ViewDragCallback());</div></pre></td></tr></table></figure></p>
+<p><code>ViewDragHelper</code>使用<code>ViewDragHelper.Callback</code>这个回调进行一些View是否可以滑动以及滑动距离的判定。<br>我们来看下<code>ViewDragHelper.Callback</code>接口的声明<br>官方文档传送门：<a href="http://developer.android.com/reference/android/support/v4/widget/ViewDragHelper.Callback.html" target="_blank" rel="external">http://developer.android.com/reference/android/support/v4/widget/ViewDragHelper.Callback.html</a><br>|定义|注释|<br>|–|–|<br>|int clampViewPositionHorizontal (View child, int left, int dx)|此方法返回一个值，告诉Helper，这个view能滑动的最大（或者负向最大）的横向坐标|<br>|int clampViewPositionVertical (View child, int top, int dy)|此方法返回一个值，告诉Helper，这个view能滑动的最大（或者负向最大）的纵向坐标|<br>|int getOrderedChildIndex (int index)|返回这个索引所指向的子视图的Z轴坐标|<br>|int getViewHorizontalDragRange (View child)|返回指定View在横向上能滑动的最大距离|<br>|int getViewVerticalDragRange (View child)|返回指定View在纵向上能滑动的最大距离|<br>|void onEdgeDragStarted (int edgeFlags, int pointerId)|当边缘开始拖动的时候，会调用这个回调|<br>|boolean onEdgeLock (int edgeFlags)|返回指定的边是否被锁定|<br>|void onEdgeTouched (int edgeFlags, int pointerId)|当边缘被触摸时，系统会回调这个函数|<br>|void onViewCaptured (View capturedChild, int activePointerId)|当有一个子视图被指定为可拖动时，系统会回调这个函数|<br>|void onViewDragStateChanged (int state)|拖动状态改变时，会回调这个函数|<br>|void onViewPositionChanged (View changedView, int left, int top, int dx, int dy)|当子视图位置变化时，会回调这个函数|<br>| void onViewReleased (View releasedChild, float xvel, float yvel)|当手指从子视图松开时，会调用这个函数，同时返回在x轴和y轴上当前的速度|<br>| boolean tryCaptureView (View child, int pointerId)|系统会依次列出这个父容器的子视图，你需要指定当前传入的这个视图是否可拖动，如果可拖动则返回<code>true</code> 否则为<code>false</code>|</p>
+<p>利用<code>ViewDragHelper</code>的回调函数，我们知道了视图被拖动的距离，然后根据这个距离和宽度的一些比例，我们可以对<code>SwipeBackLayout</code>的父容器进行一些透明度和阴影的设置。</p>
+<p>实现这个效果就是这么简单~</p>
+<blockquote>
+<p>欢迎关注我<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a> 以及 <a href="http://weibo.com/coffeesherk/home?leftnav=1" target="_blank" rel="external">@Gemini</a> </p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-android-implements-swipeback';
+          this.page.title = 'Android实现SwipeBack（右滑退出）效果';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/07/13/learn-kotlin/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/07/06/android-studio-file-structure/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/07/10/android-implements-swipeback/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

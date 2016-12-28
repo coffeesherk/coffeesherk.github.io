@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="#土豆记事#教你开发Android App之 —— Hello Android"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>#土豆记事#教你开发Android App之 —— Hello Android - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            #土豆记事#教你开发Android App之 —— Hello Android
+            
+          </h1>
+          <p class="posted-on">
+          2015-07-03
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p><a href="http://segmentfault.com/a/1190000002957332" target="_blank" rel="external">上一篇文章</a>，我们讲了如何创建一个工程，以及Android工程的一些基本概念，把工程创建出来后，我们看下文件目录结构，一个简单的工程结构如下。</p>
+<a id="more"></a>
+<p><img src="https://segmentfault.com/img/bVmzre" alt="clipboard.png"><br>其实这个目录结构初次看还是挺让人心慌慌的。<br><code>Android</code>现在引入了一个构建系统叫做<a href="https://gradle.org/" target="_blank" rel="external">Gradle</a>，你可以理解为一个C/C++里面的<code>Makefile</code> 或者是node里面的<code>gulp</code>。</p>
+<p><code>Android Studio</code>里面是分模块进行开发的，一个<code>app</code>可以只有一个模块，也可以有多个模块组成（比如一些自己开发的库）。如果我们的应用足够简单的话，那么就只有一个模块，<code>Android Studio</code>默认创建的模块就叫<code>app</code>，可以看见，文件夹旁边还有个小手机的标志，代表这是一个<code>Android Application</code>模块，而不是一个<code>Android Library</code>或者是其他模块。</p>
+<p>看看我们的代码应该放哪，我们把注意力集中在这个文件夹<br><img src="https://segmentfault.com/img/bVmzry" alt="clipboard.png"></p>
+<p><code>src</code>是<code>source</code>的意思，也就是源码所在的目录，我们主要就是在这个文件夹里写东西。</p>
+<h1 id="Main在哪？"><a href="#Main在哪？" class="headerlink" title="Main在哪？"></a>Main在哪？</h1><p>我们来看看，我们要的<code>Main</code>函数在哪里？<br>首先我们看<code>src/main</code>目录下的<code>AndroidManifest.xml</code>文件。</p>
+<p><img src="https://segmentfault.com/img/bVmzrM" alt="clipboard.png"></p>
+<p><code>AndroidManifest</code> 是描述App的一个最最重要的文件，一些内容的定义，主题的设置都在这里，如果熟悉<code>node</code>的朋友肯定知道<code>package.json</code>，一样一样的。</p>
+<p>我们看到下图，在AndroidManifest中，出现的<code>MAIN</code>和<code>LAUNCHER</code>字眼，<code>Activity</code>有了他们两个的描述，它就成了你点击app的icon启动的第一个<code>Activity</code>。<br><img src="https://segmentfault.com/img/bVmzr5" alt="clipboard.png"></p>
+<p>在<code>src/main/java</code>文件夹中，找到<code>MainActivity</code>，打开，看见其中有一个<code>onCreate</code>的函数</p>
+<p><img src="https://segmentfault.com/img/bVmzsr" alt="clipboard.png"><br>顾名思义，这个函数是在这个<code>Activity</code>创建的时候调用的，它首先调用了下父类的onCreate方法（不可省略），然后调用了<code>setContentView</code>方法，这个方法是告诉Android系统：我用哪个布局文件去渲染这个<code>Activity</code>，好了，到这里一个入口的<code>Activity</code>就创建好了。</p>
+<p>注：在<code>Android</code>系统中，<code>Activity</code>类的对象不是用来给开发者直接去<code>new</code>的，它的生命周期<strong>由系统直接管控</strong>因为我们不参与控制<code>Activity</code>的生命周期，因此它在什么时候回调什么函数变得异常重要。学习编程最好的去处就是官方文档，如果想更加深入了解Android Activity生命周期的童鞋，我这里推荐看下官方对它的描述 传送门：<a href="http://developer.android.com/training/basics/activity-lifecycle/index.html" target="_blank" rel="external">http://developer.android.com/training/basics/activity-lifecycle/index.html</a></p>
+<h1 id="界面如何自定义？"><a href="#界面如何自定义？" class="headerlink" title="界面如何自定义？"></a>界面如何自定义？</h1><p>接下来说说<code>Android</code>中的布局系统，众所周知，<code>Android</code>一开始的设计就是为了相对布局而生的。它提供了许多强大的布局特性，我们先学习下<code>Android</code>中最常见的两种布局：</p>
+<blockquote>
+<ol>
+<li>线性布局（LinearLayout）</li>
+<li>相对布局（RelativeLayout）</li>
+</ol>
+</blockquote>
+<p>线性布局就是子控件按顺序依次排列，线性布局可以设置方向，从上到下（vertical）或者从左到右（horizontal）。<br>相对布局就更自由了，如果你增加一个子控件，不设置任何属性，则子空间的位置在容器的左上角(0,0)处。如果想改变位置，可以通过在容器中的位置（比如左上，右上，左下，右下，中间，左对齐垂直居中，右对齐垂直居中等等），或者和兄弟结点的对齐方式来决定控件的位置。</p>
+<p>布局相关的参考可以看这个链接：<a href="http://developer.android.com/training/basics/firstapp/building-ui.html" target="_blank" rel="external">http://developer.android.com/training/basics/firstapp/building-ui.html</a></p>
+<h1 id="如何和控件交互"><a href="#如何和控件交互" class="headerlink" title="如何和控件交互"></a>如何和控件交互</h1><p>在<code>Activity</code>中，和<code>xml</code>相关的绑定在<code>setContentView</code>这步就算完成了。<code>Activity</code>在这之后会回调一个叫<code>onContentChanged</code>方法，在这个方法中，你可以使用类似如下代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">TextView textView = findViewById(R.id.textview);</div></pre></td></tr></table></figure></p>
+<p>来获得对指定控件的引用，其中<code>R.id.textview</code>是你在<code>xml</code>中指定的<code>android:id</code>，通常情况下，在一个<code>xml</code>文件中，同样的<code>id</code>只允许出现一次。<br>获取到对控件的引用，我们就能调用一些控件里的方法获取我们要的内容，或者设置我们要的内容，比如我这里引用了一个<code>TextView</code>，则可以如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">textView.getText()</div></pre></td></tr></table></figure></p>
+<p>获取到<code>textView</code>里面的内容。</p>
+<p>以上就是最基础的<code>UI</code>部分的入门讲解。接下去，我们可以看看要写的App的整个结构。</p>
+<blockquote>
+<p>本文提到的项目源码地址：<a href="https://github.com/geminiwen/tudounotepad" target="_blank" rel="external">https://github.com/geminiwen/tudounotepad</a><br>欢迎留言<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a>或者<a href="http://weibo.com/coffeesherk/home?wvr=5" target="_blank" rel="external">@geminiwen</a></p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-how-to-develop-android-two';
+          this.page.title = '#土豆记事#教你开发Android App之 —— Hello Android';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/07/03/how-to-develop-android-three/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/07/03/how-to-develop-android-one/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/07/03/how-to-develop-android-two/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

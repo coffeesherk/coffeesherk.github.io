@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="读LevelDB源码——数据结构之SkipList"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>读LevelDB源码——数据结构之SkipList - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            读LevelDB源码——数据结构之SkipList
+            
+          </h1>
+          <p class="posted-on">
+          2015-08-04
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/leveldb/" rel="tag">
+                  leveldb
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>今天开始看LevelDB的源码，看了几个大大小小的数据结构，印象深刻的应该是<code>SkipList</code>了，作为一个典型的<code>以空间换时间的有序链表</code> 相比平衡二叉树而言，还是简单了不少的（对于大多数操作需要O(log n)平均时间）。<br><code>SkipList</code>是一个二维空间的链表。</p>
+<a id="more"></a>
+<p>找了个比较形象的图：</p>
+<p><img src="https://segmentfault.com/img/bVmXQB" alt="clipboard.png"></p>
+<h1 id="Skip-List的定义"><a href="#Skip-List的定义" class="headerlink" title="Skip List的定义"></a>Skip List的定义</h1><p>SkipList的定义：</p>
+<ol>
+<li>一个跳表应该有几个层（level）组成；</li>
+<li>跳表的第一层包含所有的元素；</li>
+<li>每一层都是一个有序的链表；</li>
+<li>如果元素x出现在第i层，则所有比i小的层都包含x；</li>
+<li>第i层的元素通过一个down指针指向下一层拥有相同值的元素；</li>
+<li>在每一层中，-1和1两个元素都出现(分别表示INT_MIN和INT_MAX)；</li>
+<li>Top指针指向最高层的第一个元素。</li>
+</ol>
+<p>然后我们看看LevelDB中是如何实现它的。<br>首先看下层级的定义，LevelDB中定义了一个SkipList最高层级为12。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">enum &#123; kMaxHeight = 12 &#125;;</div></pre></td></tr></table></figure>
+<p>然后层级越高的链中数据越少，也就是说，从下面数上去，最底下一层我们定义为第0层，它拥有所有的数据，它是一条严格递增的链表， 也是我们传统意义上的链表。如果我们在里面找数据，那需要花去O(n)的时间。</p>
+<h1 id="结点Node的定义"><a href="#结点Node的定义" class="headerlink" title="结点Node的定义"></a>结点Node的定义</h1><p>在LevelDB中，每一个节点用一个<code>Node</code>对象进行存储。Node的定义很简单，抛去一些原子操作，实际上它就是二维链上某个结点，其中包含了所有层级的信息，我们看下它的定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">template&lt;typename Key, class Comparator&gt;</div><div class="line">struct SkipList&lt;Key,Comparator&gt;::Node &#123;</div><div class="line">  explicit Node(const Key&amp; k) : key(k) &#123; &#125;</div><div class="line"></div><div class="line">  Key const key;</div><div class="line"></div><div class="line">  // Accessors/mutators for links.  Wrapped in methods so we can</div><div class="line">  // add the appropriate barriers as necessary.</div><div class="line">  Node* Next(int n) &#123;</div><div class="line">    assert(n &gt;= 0);</div><div class="line">    // Use an &apos;acquire load&apos; so that we observe a fully initialized</div><div class="line">    // version of the returned Node.</div><div class="line">    return reinterpret_cast&lt;Node*&gt;(next_[n].Acquire_Load());</div><div class="line">  &#125;</div><div class="line">  void SetNext(int n, Node* x) &#123;</div><div class="line">    assert(n &gt;= 0);</div><div class="line">    // Use a &apos;release store&apos; so that anybody who reads through this</div><div class="line">    // pointer observes a fully initialized version of the inserted node.</div><div class="line">    next_[n].Release_Store(x);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  // No-barrier variants that can be safely used in a few locations.</div><div class="line">  Node* NoBarrier_Next(int n) &#123;</div><div class="line">    assert(n &gt;= 0);</div><div class="line">    return reinterpret_cast&lt;Node*&gt;(next_[n].NoBarrier_Load());</div><div class="line">  &#125;</div><div class="line">  void NoBarrier_SetNext(int n, Node* x) &#123;</div><div class="line">    assert(n &gt;= 0);</div><div class="line">    next_[n].NoBarrier_Store(x);</div><div class="line">  &#125;</div><div class="line"></div><div class="line"> private:</div><div class="line">  // Array of length equal to the node height.  next_[0] is lowest level link.</div><div class="line">  port::AtomicPointer next_[1];</div><div class="line">&#125;;</div><div class="line"></div><div class="line">template&lt;typename Key, class Comparator&gt;</div><div class="line">typename SkipList&lt;Key,Comparator&gt;::Node*</div><div class="line">SkipList&lt;Key,Comparator&gt;::NewNode(const Key&amp; key, int height) &#123;</div><div class="line">  char* mem = arena_-&gt;AllocateAligned(</div><div class="line">      sizeof(Node) + sizeof(port::AtomicPointer) * (height - 1));</div><div class="line">  return new (mem) Node(key);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这块其实特别少，它最后用了<code>弹性指针</code>的方式来对不同高度的Node进行不同内存的分配（这里的arena是LevelDB中的内存池，附带了对齐的特性，以后介绍），从而达到节省内存和优化对CPU缓存的目的。</p>
+<h1 id="插入结点"><a href="#插入结点" class="headerlink" title="插入结点"></a>插入结点</h1><p>我们来简单看一个插入结点的操作。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">template&lt;typename Key, class Comparator&gt;</div><div class="line">void SkipList&lt;Key,Comparator&gt;::Insert(const Key&amp; key) &#123;</div><div class="line">  // TODO(opt): We can use a barrier-free variant of FindGreaterOrEqual()</div><div class="line">  // here since Insert() is externally synchronized.</div><div class="line">  Node* prev[kMaxHeight];</div><div class="line">  Node* x = FindGreaterOrEqual(key, prev);</div><div class="line"></div><div class="line">  assert(x == NULL || !Equal(key, x-&gt;key));</div><div class="line"></div><div class="line">  int height = RandomHeight();</div><div class="line">  if (height &gt; GetMaxHeight()) &#123;</div><div class="line">    for (int i = GetMaxHeight(); i &lt; height; i++) &#123;</div><div class="line">      prev[i] = head_;</div><div class="line">    &#125;</div><div class="line">    //fprintf(stderr, &quot;Change height from %d to %d\n&quot;, max_height_, height);</div><div class="line"></div><div class="line">    // It is ok to mutate max_height_ without any synchronization</div><div class="line">    // with concurrent readers.  A concurrent reader that observes</div><div class="line">    // the new value of max_height_ will see either the old value of</div><div class="line">    // new level pointers from head_ (NULL), or a new value set in</div><div class="line">    // the loop below.  In the former case the reader will</div><div class="line">    // immediately drop to the next level since NULL sorts after all</div><div class="line">    // keys.  In the latter case the reader will use the new node.</div><div class="line">    max_height_.NoBarrier_Store(reinterpret_cast&lt;void*&gt;(height));</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  x = NewNode(key, height);</div><div class="line">  for (int i = 0; i &lt; height; i++) &#123;</div><div class="line">    // NoBarrier_SetNext() suffices since we will add a barrier when</div><div class="line">    // we publish a pointer to &quot;x&quot; in prev[i].</div><div class="line">    x-&gt;NoBarrier_SetNext(i, prev[i]-&gt;NoBarrier_Next(i));</div><div class="line">    prev[i]-&gt;SetNext(i, x);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这段代码的幽默感其实蛮强= = 我一开始不太理解<code>RandomHeight</code>的意义，后来查了一些资料才知道SkipList就是<code>概率性</code>的进行分层——我获取一个height的随机数，当然它是有要求的，就是在0和<code>kMaxHeight</code>之间，然后，我插入的这个结点就在0-height层上都分布了，同时需要修改前缀的指针（如果超越了当前的<code>max_height_</code>，那么同时也要修改<code>max_height_</code>）。</p>
+<p>这里耗费的空间可能是O(n*kMaxHeight)了，然后浪费了这么多资源，目的当然是为了高效的读嘛，我们来看下它的读取操作是怎么做的。</p>
+<h1 id="读取Node"><a href="#读取Node" class="headerlink" title="读取Node"></a>读取Node</h1><p>这段代码是读取大于等于key的第一个结点（并把所有层级上在key前面的结点记录到prev数组里）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">template&lt;typename Key, class Comparator&gt;</div><div class="line">typename SkipList&lt;Key,Comparator&gt;::Node* SkipList&lt;Key,Comparator&gt;::FindGreaterOrEqual(const Key&amp; key, Node** prev)</div><div class="line">    const &#123;</div><div class="line">  Node* x = head_;</div><div class="line">  int level = GetMaxHeight() - 1;</div><div class="line">  while (true) &#123;</div><div class="line">    Node* next = x-&gt;Next(level);</div><div class="line">    if (KeyIsAfterNode(key, next)) &#123;</div><div class="line">      // Keep searching in this list</div><div class="line">      x = next;</div><div class="line">    &#125; else &#123;</div><div class="line">      if (prev != NULL) prev[level] = x;</div><div class="line">      if (level == 0) &#123;</div><div class="line">        return next;</div><div class="line">      &#125; else &#123;</div><div class="line">        // Switch to next list</div><div class="line">        level--;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们的逻辑从最高层开始，我们已知最高层的结点分布是稀疏的，那么利用<code>KeyIsAfterNode</code>函数进行比较。</p>
+<ol>
+<li>在当前level，如果下一个结点的<code>key</code>比我要比较的<code>key</code>大，到步骤2。</li>
+<li>如果到底层了，返回下一个结点，否则降级，再执行1。</li>
+</ol>
+<p>因为当前的x结点的下一个层级必然还是x结点，但是它的下一个结点的情况却是未知，因此把低层级的next结点和key进行比较，如此循环，我们就能利用稀疏的链迅速的在密集的链表中找到我们要的元素。</p>
+<p>经过整体分析和理解，其实<code>SkipList</code>还是很简单的，最终也是利用了空间换时间的方法。只是它的生成有概率性，但是和平衡二叉树（AVL Tree）比起来，它整体的性价比还是非常可观的~</p>
+<p>PS: Google的cpp代码真的很浅显易懂，稍微思考下，做一下笔记，就能明白其中的道理，真的很棒！（也许是LevelDB本身就很简单= =）</p>
+<blockquote>
+<p>欢迎关注我<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a> 以及 <a href="http://weibo.com/coffeesherk/home?leftnav=1" target="_blank" rel="external">@Gemini</a> </p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-about-skip-list';
+          this.page.title = '读LevelDB源码——数据结构之SkipList';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/08/11/android-screen-lock/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/07/31/about-tint/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/08/04/about-skip-list/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

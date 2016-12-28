@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="android 实现【夜晚模式】的另外一种思路"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>android 实现【夜晚模式】的另外一种思路 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            android 实现【夜晚模式】的另外一种思路
+            
+          </h1>
+          <p class="posted-on">
+          2016-06-16
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>在一切开始之前，我只想用正当的方式，跪求各位的一个star<br><img src="https://segmentfault.com/img/bVyej3" alt="clipboard.png"><br><a id="more"></a></p>
+<p><a href="https://github.com/geminiwen/skin-sprite" target="_blank" rel="external">https://github.com/geminiwen/skin-sprite</a></p>
+<p>预览<br><img src="https://raw.githubusercontent.com/geminiwen/skin-sprite/master/art/preview.gif" alt="preview"></p>
+<h1 id="序"><a href="#序" class="headerlink" title="序"></a>序</h1><p>在写<code>SegmentFault for Android 4.0</code>的过程中，因为原先采用的夜间模式，代码着实不好看，于是我又开始挖坑了。</p>
+<p>在几个月前更新的<code>Android Support Library 23.2</code>中，让我们认识到了<code>DayNight Theme</code>。一看源码，原来以前在<code>API 8</code>的时候就已经有了<code>night</code>相关的资源可以设置，只是之前一直不知道怎么使用，后来发现原来还是利用了<code>AssetManager</code>相关的API —— Android在指定条件下加载指定文件夹中的资源。 这正是我想要的！ 这样我们只用指定好引用的资源，（比如<code>@color/colorPrimary</code>） 那么我就可以在白天加载<code>values/color.xml</code>中的资源，晚上加载<code>values-night/color.xml</code>中的资源。</p>
+<p><img src="https://segmentfault.com/img/bVyeeA" alt="白天加载values的资源，晚上加载values-night的资源"></p>
+<p><code>v7</code>已经帮我们完成了这里的功能，放置夜晚资源的问题也已经解决了，可是每次切换<code>DayNight</code>模式的时候，需要重启下<code>Activity</code>，这件事情很让人讨厌，原因就是因为重启后，我们的<code>Context</code>就会重新创建，<code>View</code>也会重新创建，根据当前系统（应用）配置的不同，加载不同的资源。 <strong>那我们有没有可能做到不重启<code>Activity</code>来实现夜间模式呢？</strong>其实实现方案很简单：我们只用记录好系统渲染xml的时候，当时给<code>View</code>的资源id，在特定时刻，重新加载这些资源，然后设置给View即可。接下去我们碰到两个问题：</p>
+<blockquote>
+<ol>
+<li>在引入这个库的情况下，让开发者少改已有的xml文件，把所有的布局都换为我们指定的布局。</li>
+<li>API要尽量简单，清楚，明白。</li>
+</ol>
+</blockquote>
+<p>上面两个条件说起来很容易，其实想实现并不是很容易的，还好<code>AppCompat</code>给了我一些思路。</p>
+<h1 id="来自AppCompat的启发"><a href="#来自AppCompat的启发" class="headerlink" title="来自AppCompat的启发"></a>来自AppCompat的启发</h1><p>当我们引入<code>appcompat-v7</code>，有了<code>AppCompatActivity</code>的时候，我们发现我们渲染的<code>TextView</code>/<code>Button</code>等组件分别变成了<code>AppCompatTextView</code>和<code>AppCompatButton</code>， 这些组件都是包含在<code>v7</code>包中的，很早以前觉得很神奇，当看了<code>AppCompatActivity</code>和<code>AppCompatDelegate</code>的源码，知道了<code>LayoutInflator.Factory</code>这些东西的工作原理之后，这一切也就不神奇了 —— 它只是在<code>inflate</code>的过程中，注入了自己的代码进去，比如把<code>TextView</code>解析成<code>AppCompatTextView</code>类，达到对解析结果拦截的目的。</p>
+<p>OK，借助这个方法，我们可以在<code>Activity.onCreate</code>中，注入我们自己的<code>LayoutInflatorFactory</code>：</p>
+<p><img src="https://segmentfault.com/img/bVyeg8" alt="clipboard.png"></p>
+<p>像这样，有兴趣的同学可以看看<code>AppCompatDelegateImplV7</code>这个类的<code>installViewFactory</code>方法的实现。<br>接下去我们的目的是把<code>TextView</code>、<code>Button</code>等类换成我们自己的实现——<code>SkinnableTextView</code>和<code>SkinnableButton</code>。<br>可以翻到<code>AppCompatViewInflater</code>这个类的源码，其实很清晰了：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> View <span class="title">createView</span><span class="params">(View parent, <span class="keyword">final</span> String name, @NonNull Context context,</span></span></div><div class="line">           @NonNull AttributeSet attrs, <span class="keyword">boolean</span> inheritContext,</div><div class="line">           <span class="keyword">boolean</span> readAndroidTheme, <span class="keyword">boolean</span> readAppTheme, <span class="keyword">boolean</span> wrapContext) &#123;</div><div class="line">       <span class="keyword">final</span> Context originalContext = context;</div><div class="line"></div><div class="line">       <span class="comment">// We can emulate Lollipop's android:theme attribute propagating down the view hierarchy</span></div><div class="line">       <span class="comment">// by using the parent's context</span></div><div class="line">       <span class="keyword">if</span> (inheritContext &amp;&amp; parent != <span class="keyword">null</span>) &#123;</div><div class="line">           context = parent.getContext();</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">if</span> (readAndroidTheme || readAppTheme) &#123;</div><div class="line">           <span class="comment">// We then apply the theme on the context, if specified</span></div><div class="line">           context = themifyContext(context, attrs, readAndroidTheme, readAppTheme);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">if</span> (wrapContext) &#123;</div><div class="line">           context = TintContextWrapper.wrap(context);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       View view = <span class="keyword">null</span>;</div><div class="line"></div><div class="line">       <span class="comment">// We need to 'inject' our tint aware Views in place of the standard framework versions</span></div><div class="line">       <span class="keyword">switch</span> (name) &#123;</div><div class="line">           <span class="keyword">case</span> <span class="string">"TextView"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatTextView(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"ImageView"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatImageView(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"Button"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatButton(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"EditText"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatEditText(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"Spinner"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatSpinner(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"ImageButton"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatImageButton(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"CheckBox"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatCheckBox(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"RadioButton"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatRadioButton(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"CheckedTextView"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatCheckedTextView(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"AutoCompleteTextView"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatAutoCompleteTextView(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"MultiAutoCompleteTextView"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatMultiAutoCompleteTextView(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"RatingBar"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatRatingBar(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">           <span class="keyword">case</span> <span class="string">"SeekBar"</span>:</div><div class="line">               view = <span class="keyword">new</span> AppCompatSeekBar(context, attrs);</div><div class="line">               <span class="keyword">break</span>;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (view == <span class="keyword">null</span> &amp;&amp; originalContext != context) &#123;</div><div class="line">           <span class="comment">// If the original context does not equal our themed context, then we need to manually</span></div><div class="line">           <span class="comment">// inflate it using the name so that android:theme takes effect.</span></div><div class="line">           view = createViewFromTag(context, name, attrs);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</div><div class="line">           <span class="comment">// If we have created a view, check it's android:onClick</span></div><div class="line">           checkOnClickListener(view, attrs);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">return</span> view;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>这里完成的工作就是把<code>XML</code>中的一些Tag解析为java的类实例，我们可以依样画葫芦，只不过把其中的<code>AppCompatTextView</code>换成<code>SkinnableTextView</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//省略代码</span></div><div class="line"><span class="keyword">switch</span> (name) &#123;</div><div class="line">   <span class="keyword">case</span> <span class="string">"TextView"</span>:</div><div class="line">       view = <span class="keyword">new</span> SkinnableTextView(context, attrs);</div><div class="line">       <span class="keyword">break</span>;</div><div class="line">&#125;</div><div class="line"><span class="comment">//省略代码</span></div></pre></td></tr></table></figure>
+<p>好了，如果有需要，我们在库中把所有的类都替换成自己的实现，就能达到目的了，使得那些使用原始控件的开发者，不修改一丝一毫的代码，渲染出我们定制的控件。</p>
+<h1 id="应用DayNightMode"><a href="#应用DayNightMode" class="headerlink" title="应用DayNightMode"></a>应用DayNightMode</h1><p>上一节我们解决了自定义<code>View</code>替换原始<code>View</code>的问题，那么接下去怎么办呢？这里我们同样也参考<code>AppCompat</code>关于<code>BackgroundTint</code>的一些设计方式。首先我们可以看到<code>AppComatTextView</code>的声明：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public class AppCompatTextView extends TextView implements TintableBackgroundView &#123;</div><div class="line">//...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>实现了一个<code>TintableBackgroundView</code>的接口，而我们使用<code>ViewCompat.setSupportBackgroundTint</code>的时候，可以找到这么一条：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">static void setBackgroundTintList(View view, ColorStateList tintList) &#123;</div><div class="line">    if (view instanceof TintableBackgroundView) &#123;</div><div class="line">        ((TintableBackgroundView) view).setSupportBackgroundTintList(tintList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>利用OO的特性，很轻松的判断这个View是否支持我们想要的特性，这时候我也声明了一个接口<code>Skinnable</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public class SkinnableTextView extends AppCompatTextView implements Skinnable &#123;</div><div class="line">    //...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这样等于给我的类打了一个标记，外部调用的时候，就可以判断这个View是否实现了我们的接口，如果实现了接口，就可以调用相关的函数。</p>
+<p>我们在<code>Activity</code>的基类中，可以如此调用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">private void applyDayNightForView(View view) &#123;</div><div class="line">    if (view instanceof Skinnable) &#123;</div><div class="line">        Skinnable skinnable = (Skinnable) view;</div><div class="line">        if (skinnable.isSkinnable()) &#123;</div><div class="line">            skinnable.applyDayNight();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (view instanceof ViewGroup) &#123;</div><div class="line">        ViewGroup parent = (ViewGroup)view;</div><div class="line">        int childCount = parent.getChildCount();</div><div class="line">        for (int i = 0; i &lt; childCount; i++) &#123;</div><div class="line">            applyDayNightForView(parent.getChildAt(i));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>利用递归的方式，把所有实现<code>Skinnable</code>接口的<code>View</code>全部应用了<code>applyDayNight</code>方法。 因此开发者使用的时候，只用把<code>Activity</code>的继承改为<code>SkinnableActivity</code>，然后在恰当的时机调用<code>setDayNightMode</code>即可。</p>
+<h1 id="Skinnable在View中具体实现"><a href="#Skinnable在View中具体实现" class="headerlink" title="Skinnable在View中具体实现"></a>Skinnable在View中具体实现</h1><p>这节讲的是如何解决我们的痛点 —— 不重启<code>Activity</code>应用<code>DayNight mode</code>。</p>
+<p>那我们的<code>View</code>实现<code>Skinnable</code>接口中的方法，到底是如何工作的呢，以<code>SkinnableTextView</code>为例子。<br>一般我们对<code>TextView</code>应用的样式有<code>background</code>和<code>textColor</code>，额外的情况下带一个<code>backgroundTint</code>都是OK的。<br>首先我们的大前提是，这些资源在<code>xml</code>中是用引用的方式传进来的，什么意思呢，看下面的表格<br>|对|错|<br>|–|–|<br>|android:textColor=”@color/primaryColor”|android:textColor=”#fff”|<br>|android:textColor=”?attr/colorPrimary”|android:textColor=”#000”|</p>
+<p>总结起来一句话，就是不应该是绝对值，如果是绝对值的话，我们去改它的值也不符合逻辑。</p>
+<p>那么如果是资源引用的方式的话，我们使用<code>TypedArray</code>这个对象，是可以获取到我们引用的资源的id的，也就是<code>R.color.primaryColor</code>的具体数值。 我们把这个值保存下来，然后在恰当的时候，利用这个值再去变化后的<code>Context</code>中获取一遍指定的颜色</p>
+<blockquote>
+<p>ContextCompat.getColor(context, R.color.primaryColor);</p>
+</blockquote>
+<p>这时候我们获取到的实际值，<code>context</code>就会根据系统的配置去正确的文件夹下找我们想要的资源了。</p>
+<p>我们利用<code>TypedArray</code>能获取到资源的id，使用<code>TypedArray.getResourceId</code>方法即可，传入属性的索引值就行。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">public void storeAttributeResource(TypedArray a, int[] styleable) &#123;</div><div class="line">    int size = a.getIndexCount();</div><div class="line">    for (int index = 0; index &lt; size; index ++) &#123;</div><div class="line">        int resourceId = a.getResourceId(index, -1);</div><div class="line">        int key = styleable[index];</div><div class="line">        if (resourceId != -1) &#123;</div><div class="line">            mResourceMap.put(key, resourceId);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最后，在切换夜间模式的时候，我们调用了<code>applyDayNight</code>方法，具体代码如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">applyDayNight</span><span class="params">()</span> </span>&#123;</div><div class="line">    Context context = getContext();</div><div class="line">    <span class="keyword">int</span> key;</div><div class="line"></div><div class="line">    key = R.styleable.SkinnableView[R.styleable.SkinnableView_android_background];</div><div class="line">    Integer backgroundResource = mAttrsHelper.getAttributeResource(key);</div><div class="line">    <span class="keyword">if</span> (backgroundResource != <span class="keyword">null</span>) &#123;</div><div class="line">        Drawable background = ContextCompat.getDrawable(context, backgroundResource);</div><div class="line">        <span class="comment">//这时候获取到的background是符合上下文的</span></div><div class="line">        setBackgroundDrawable(background);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//省略代码</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h1 id="总结以及缺陷"><a href="#总结以及缺陷" class="headerlink" title="总结以及缺陷"></a>总结以及缺陷</h1><p>经过以上几点的开发，我们使用日/夜模式切换就变得非常容易了，比如我们如果只处理颜色的修改的话，只用在<code>values/colors.xml</code>和<code>values-night/colors.xml</code>配置好指定颜色在不同模式下的表现形式，再调用<code>setDayNightMode</code>方法，就可以完成一键切换，不需要在<code>xml</code>中添加任何复杂凌乱的东西。</p>
+<p>因为在配置上节省了许多代码，那我们的约定就变得比较冗长了，如果想进行自定义View的换肤的话，就需要手动去实现<code>Skinnable</code>接口，实现<code>applyDayNight</code>方法，开发者这时候就需要去做一些缓存资源id的操作。</p>
+<p>同时因为它依赖于<code>AppCompat DayNight Mode</code>，它只能作用于日/夜间模式的切换，要想实现<code>换肤</code>功能，是做不到的。</p>
+<p>这两点是缺陷，同时也是和市面上其他换肤库最不同的地方。但是我们把肮脏的代码隐藏在顶部实现里，就是为了业务逻辑层代码的干净和整洁。</p>
+<p>希望各位会喜欢，然后有问题可以留言或者在<code>github</code>上给我提PR，非常感谢。</p>
+<p>Github Repo 地址：<a href="https://github.com/geminiwen/skin-sprite" target="_blank" rel="external">https://github.com/geminiwen/skin-sprite</a></p>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-android-daynight-theme';
+          this.page.title = 'android 实现【夜晚模式】的另外一种思路';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2016/07/21/deploy-ci/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2016/06/14/websocket-protocol/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2016/06/16/android-daynight-theme/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

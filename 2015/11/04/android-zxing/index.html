@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Android 扫描二维码的实现（简化zxing）"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Android 扫描二维码的实现（简化zxing） - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Android 扫描二维码的实现（简化zxing）
+            
+          </h1>
+          <p class="posted-on">
+          2015-11-04
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+                <a href="/tags/zxing/" rel="tag">
+                  zxing
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>哎呀呀，在<code>杭州2015 Hackthon</code>的现场，因为没有二维码签到功能，被吐槽low！这是我近期最丢脸的事啦~<br>于是回来就开始着手开发二维码相关的东西了。<br><a id="more"></a></p>
+<p>一搜索<code>Google</code>和我们<code>SegmentFault</code>，发现在<code>Android</code>上，<code>Google</code>的<code>zxing</code>这个二维码的库比较受欢迎，好，那就是它了（我就是这么任性= =）</p>
+<p>OK，看下<code>zxing</code>这个项目<a href="https://github.com/zxing/zxing" target="_blank" rel="external">https://github.com/zxing/zxing</a><br>好像非常大啊，如何快速用起来呢？</p>
+<p>答案就是</p>
+<blockquote>
+<p>简化！</p>
+</blockquote>
+<p>简化的话，带来的副作用就是适用性降低，比如在这个场景里面，我们不考虑横屏的情况，不考虑对摄像头进行过多的配置，不存在截图。</p>
+<h2 id="简化过程"><a href="#简化过程" class="headerlink" title="简化过程"></a>简化过程</h2><p>我们看下这个项目有一个<code>android</code>目录，它里面其实就是<code>条码扫描器</code>这个app的开源代码，因为我们暂时不需要深究它是如何进行图像识别，如何帮我们从图像里解析出二维码的，所以我们就不研究<code>core</code>相关的内容（但是里面都是干货啊！图像识别的干货啊！）</p>
+<p><img src="/img/bVqHmc" alt="clipboard.png"><br>我们最主要就是参考这个里面的源码啦。</p>
+<p>先把整个项目clone下来，然后把<code>android</code>这个源码导入到<code>Android Studio</code>里面去，经过小小的配置，就能搞定啦，直接运行我们就能看见这个App了。</p>
+<p>先看下我们要做的工作是啥：</p>
+<blockquote>
+<ol>
+<li>对摄像头进行管理（为了兼容老设备，我们要用即将被Google舍弃的<code>android.hardware.camera</code>类）。</li>
+<li>对获取的一帧图片进行解析。</li>
+<li>对解析的结果进行处理。</li>
+</ol>
+</blockquote>
+<p>如果不带着问题或者目的去看源码的话，会非常没头绪，所以我们一定要记得我们想要做什么。</p>
+<p>OK，先看第一个问题，我们需要对摄像头进行管理。我们可以看到目录中有三个文件和摄像机有关</p>
+<p><img src="/img/bVqHm8" alt="clipboard.png"><br>就是这三个文件啦。</p>
+<table>
+<thead>
+<tr>
+<th>类</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CameraConfigurationManager</code></td>
+<td>这个类主要用于对摄像头进行一些配置，包括旋转角度、预览图尺寸等等</td>
+</tr>
+<tr>
+<td><code>CameraConfigurationUtils</code></td>
+<td>工具类，在<code>CameraConfigurationManager</code>调用，</td>
+</tr>
+<tr>
+<td><code>CameraManager</code></td>
+<td>控制摄像头的生命周期，获取预览尺寸，生成原始数据发送给解析器</td>
+</tr>
+</tbody>
+</table>
+<p>在这里，我把<code>CameraConfigurationUtils</code>拷贝过来，另外两个类合成到<code>CameraManager</code>里面，在初始化的时候，做好配置。</p>
+<h2 id="摄像头的管理（横屏改竖屏）"><a href="#摄像头的管理（横屏改竖屏）" class="headerlink" title="摄像头的管理（横屏改竖屏）"></a>摄像头的管理（横屏改竖屏）</h2><p>因为原先zxing给的demo是横屏的，这里要改成竖屏，就需要做几个配置。</p>
+<h3 id="getFramingRectInPreview"><a href="#getFramingRectInPreview" class="headerlink" title="getFramingRectInPreview"></a>getFramingRectInPreview</h3><p>在<code>getFramingRectInPreview</code>这个函数中，<code>cameraResolution</code>和<code>screenResolution</code>方向不对，所以<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">rect.left = rect.left * cameraResolution.y / screenResolution.x;</div><div class="line">rect.right = rect.right * cameraResolution.y / screenResolution.x;</div><div class="line">rect.top = rect.top * cameraResolution.x / screenResolution.y;</div><div class="line">rect.bottom = rect.bottom * cameraResolution.x / screenResolution.y;</div></pre></td></tr></table></figure></p>
+<p>这里需要把方向换一下。</p>
+<h3 id="binary-data"><a href="#binary-data" class="headerlink" title="binary data"></a>binary data</h3><p>还需要更改的地方，就是在获取<code>帧预览</code>中的原始数据，需要进行一个旋转，因为<code>zxing</code>原先是对横向的图片一行一行读取的，如果我们给予纵向的数据，就必须旋转数据，或者更改读取算法。 这里更改数据可能会更加方便，<br>在<code>buildLuminanceSource</code>中，更改：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">byte[] rotatedData = new byte[data.length];</div><div class="line">for (int y = 0; y &lt; height; y++) &#123;</div><div class="line">    for (int x = 0; x &lt; width; x++)</div><div class="line">        rotatedData[x * height + height - y - 1] = data[x + y * width];</div><div class="line">&#125;</div><div class="line">int tmp = width;</div><div class="line">width = height;</div><div class="line">height = tmp;</div></pre></td></tr></table></figure></p>
+<p>最后记得把摄像头的预览旋转改成90°即可。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">camera.setDisplayOrientation(<span class="number">90</span>);</div></pre></td></tr></table></figure></p>
+<p>附上这部分代码（比较长）<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CameraManager</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MIN_FRAME_WIDTH = <span class="number">240</span>;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MIN_FRAME_HEIGHT = <span class="number">240</span>;</div><div class="line"></div><div class="line">    <span class="comment">// 这里修正扫描大小</span></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_FRAME_WIDTH = <span class="number">675</span>; <span class="comment">// = 5/8 * 1920</span></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAX_FRAME_HEIGHT = <span class="number">1200</span>; <span class="comment">// = 5/8 * 1080</span></div><div class="line"></div><div class="line">    <span class="keyword">private</span> Context mContext;</div><div class="line">    <span class="keyword">private</span> Point mScreenResolution;</div><div class="line">    <span class="keyword">private</span> Point mCameraResolution;</div><div class="line">    <span class="keyword">private</span> Point mBestPreviewSize;</div><div class="line">    <span class="keyword">private</span> Point mPreviewSizeOnScreen;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Rect mFramingRectInPreview;</div><div class="line">    <span class="keyword">private</span> Rect mFramingRect;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Camera mCamera;</div><div class="line">    <span class="keyword">private</span> PreviewCallback mPreviewCallback;</div><div class="line">    <span class="keyword">private</span> AutoFocusManager mAutoFocusManager;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CameraManager</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        mContext = context;</div><div class="line">        mPreviewCallback = <span class="keyword">new</span> PreviewCallback(<span class="keyword">this</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">openDriver</span><span class="params">(Camera camera, SurfaceHolder holder)</span> </span>&#123;</div><div class="line">        mCamera = camera;</div><div class="line"></div><div class="line">        Camera.Parameters parameters = camera.getParameters();</div><div class="line"></div><div class="line">        CameraConfigurationUtils.setBarcodeSceneMode(parameters);</div><div class="line">        CameraConfigurationUtils.setFocus(parameters,</div><div class="line">                <span class="keyword">true</span>,</div><div class="line">                <span class="keyword">true</span>,</div><div class="line">                <span class="keyword">false</span>);</div><div class="line"></div><div class="line">        Point theScreenResolution = <span class="keyword">new</span> Point();</div><div class="line">        Rect rect = holder.getSurfaceFrame();</div><div class="line">        theScreenResolution.set(rect.height(), rect.width());</div><div class="line">        mScreenResolution = theScreenResolution;</div><div class="line">        mCameraResolution = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, mScreenResolution);</div><div class="line">        mBestPreviewSize = CameraConfigurationUtils.findBestPreviewSizeValue(parameters, mScreenResolution);</div><div class="line"></div><div class="line">        <span class="keyword">boolean</span> isScreenPortrait = mScreenResolution.x &lt; mScreenResolution.y;</div><div class="line">        <span class="keyword">boolean</span> isPreviewSizePortrait = mBestPreviewSize.x &lt; mBestPreviewSize.y;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (isScreenPortrait == isPreviewSizePortrait) &#123;</div><div class="line">            mPreviewSizeOnScreen = mBestPreviewSize;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            mPreviewSizeOnScreen = <span class="keyword">new</span> Point(mBestPreviewSize.y, mBestPreviewSize.x);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        parameters.setPreviewSize(mBestPreviewSize.x, mBestPreviewSize.y);</div><div class="line">        camera.setParameters(parameters);</div><div class="line">        camera.setDisplayOrientation(<span class="number">90</span>);</div><div class="line"></div><div class="line">        Camera.Parameters afterParameters = camera.getParameters();</div><div class="line">        Camera.Size afterSize = afterParameters.getPreviewSize();</div><div class="line">        <span class="keyword">if</span> (afterSize != <span class="keyword">null</span> &amp;&amp; (mBestPreviewSize.x != afterSize.width || mBestPreviewSize.y != afterSize.height)) &#123;</div><div class="line">            mBestPreviewSize.x = afterSize.width;</div><div class="line">            mBestPreviewSize.y = afterSize.height;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Rect <span class="title">getFramingRect</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (mFramingRect == <span class="keyword">null</span>) &#123;</div><div class="line">            Point screenResolution = mScreenResolution;</div><div class="line">            <span class="keyword">if</span> (screenResolution == <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// Called early, before init even finished</span></div><div class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">int</span> width = findDesiredDimensionInRange(screenResolution.x, MIN_FRAME_WIDTH, MAX_FRAME_WIDTH);</div><div class="line">            <span class="keyword">int</span> height = findDesiredDimensionInRange(screenResolution.y, MIN_FRAME_HEIGHT, MAX_FRAME_HEIGHT);</div><div class="line"></div><div class="line">            <span class="keyword">int</span> leftOffset = (screenResolution.x - width) / <span class="number">2</span>;</div><div class="line">            <span class="keyword">int</span> topOffset = (screenResolution.y - height) / <span class="number">2</span>;</div><div class="line">            mFramingRect = <span class="keyword">new</span> Rect(leftOffset, topOffset, leftOffset + width, topOffset + height);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> mFramingRect;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> Point <span class="title">getCameraResolution</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> mCameraResolution;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Rect <span class="title">getFramingRectInPreview</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (mFramingRectInPreview == <span class="keyword">null</span>) &#123;</div><div class="line">            Rect framingRect = getFramingRect();</div><div class="line">            <span class="keyword">if</span> (framingRect == <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line">            Rect rect = <span class="keyword">new</span> Rect(framingRect);</div><div class="line">            Point cameraResolution = mCameraResolution;</div><div class="line">            Point screenResolution = mScreenResolution;</div><div class="line">            <span class="keyword">if</span> (cameraResolution == <span class="keyword">null</span> || screenResolution == <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// Called early, before init even finished</span></div><div class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line">            rect.left = rect.left * cameraResolution.y / screenResolution.x;</div><div class="line">            rect.right = rect.right * cameraResolution.y / screenResolution.x;</div><div class="line">            rect.top = rect.top * cameraResolution.x / screenResolution.y;</div><div class="line">            rect.bottom = rect.bottom * cameraResolution.x / screenResolution.y;</div><div class="line">            mFramingRectInPreview = rect;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> mFramingRectInPreview;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">findDesiredDimensionInRange</span><span class="params">(<span class="keyword">int</span> resolution, <span class="keyword">int</span> hardMin, <span class="keyword">int</span> hardMax)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> dim = <span class="number">5</span> * resolution / <span class="number">8</span>; <span class="comment">// Target 5/8 of each dimension</span></div><div class="line">        <span class="keyword">if</span> (dim &lt; hardMin) &#123;</div><div class="line">            <span class="keyword">return</span> hardMin;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (dim &gt; hardMax) &#123;</div><div class="line">            <span class="keyword">return</span> hardMax;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> dim;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * A factory method to build the appropriate LuminanceSource object based on the format</div><div class="line">     * of the preview buffers, as described by Camera.Parameters.</div><div class="line">     *</div><div class="line">     * <span class="doctag">@param</span> data A preview frame.</div><div class="line">     * <span class="doctag">@param</span> width The width of the image.</div><div class="line">     * <span class="doctag">@param</span> height The height of the image.</div><div class="line">     * <span class="doctag">@return</span> A PlanarYUVLuminanceSource instance.</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> PlanarYUVLuminanceSource <span class="title">buildLuminanceSource</span><span class="params">(<span class="keyword">byte</span>[] data, <span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> </span>&#123;</div><div class="line">        Rect rect = getFramingRectInPreview();</div><div class="line">        <span class="keyword">if</span> (rect == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">byte</span>[] rotatedData = <span class="keyword">new</span> <span class="keyword">byte</span>[data.length];</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> y = <span class="number">0</span>; y &lt; height; y++) &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> x = <span class="number">0</span>; x &lt; width; x++)</div><div class="line">                rotatedData[x * height + height - y - <span class="number">1</span>] = data[x + y * width];</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">int</span> tmp = width;</div><div class="line">        width = height;</div><div class="line">        height = tmp;</div><div class="line"></div><div class="line">        <span class="comment">// Go ahead and assume it's YUV rather than die.</span></div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PlanarYUVLuminanceSource(rotatedData, width, height, rect.left, rect.top,</div><div class="line">                rect.width(), rect.height(), <span class="keyword">false</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * A single preview frame will be returned to the handler supplied. The data will arrive as byte[]</div><div class="line">     * in the message.obj field, with width and height encoded as message.arg1 and message.arg2,</div><div class="line">     * respectively.</div><div class="line">     *</div><div class="line">     * <span class="doctag">@param</span> handler The handler to send the message to.</div><div class="line">     * <span class="doctag">@param</span> message The what field of the message to be sent.</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">requestPreviewFrame</span><span class="params">(Handler handler, <span class="keyword">int</span> message)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (mCamera != <span class="keyword">null</span>) &#123;</div><div class="line">            mPreviewCallback.setHandler(handler, message);</div><div class="line">            mCamera.setOneShotPreviewCallback(mPreviewCallback);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">startPreview</span><span class="params">()</span> </span>&#123;</div><div class="line">        mCamera.startPreview();</div><div class="line">        mAutoFocusManager = <span class="keyword">new</span> AutoFocusManager(mContext, mCamera);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">stopPreview</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (mAutoFocusManager != <span class="keyword">null</span>) &#123;</div><div class="line">            mAutoFocusManager.stop();</div><div class="line">            mAutoFocusManager = <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (mCamera != <span class="keyword">null</span>) &#123;</div><div class="line">            mCamera.stopPreview();</div><div class="line">        &#125;</div><div class="line">        mPreviewCallback.setHandler(<span class="keyword">null</span>, <span class="number">0</span>);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">closeDriver</span><span class="params">()</span> </span>&#123;</div><div class="line">        mCamera.release();</div><div class="line">        mCamera = <span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="获取图像数据"><a href="#获取图像数据" class="headerlink" title="获取图像数据"></a>获取图像数据</h2><p><code>Camera</code>提供这么一个函数：<code>setOneShotPreviewCallback</code>，看名字就知道，它是会在某个时间点，回调你给的接口，然后传入一个二进制的图像数组，让你去解析，这正是我们想要的东西，所以我们看下这个<code>PreviewCallback</code>，它只有一个函数，<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPreviewFrame</span><span class="params">(<span class="keyword">byte</span>[] data, Camera camera)</span> </span>&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>很显然，第一个参数就是图像数组了，我们看看<code>zxing</code>里面是怎么处理这个数据的。</p>
+<h3 id="解析数据"><a href="#解析数据" class="headerlink" title="解析数据"></a>解析数据</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPreviewFrame</span><span class="params">(<span class="keyword">byte</span>[] data, Camera camera)</span> </span>&#123;</div><div class="line">    Point cameraResolution = mCameraManager.getCameraResolution();</div><div class="line">    Handler thePreviewHandler = mPreviewHandler;</div><div class="line">    <span class="keyword">if</span> (cameraResolution != <span class="keyword">null</span> &amp;&amp; thePreviewHandler != <span class="keyword">null</span>) &#123;</div><div class="line">        Message message = thePreviewHandler.obtainMessage(mPreviewMessage, cameraResolution.x,</div><div class="line">                cameraResolution.y, data);</div><div class="line">        message.sendToTarget();</div><div class="line">        mPreviewHandler = <span class="keyword">null</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>zxing</code>是发送到另外一个handler，也就是说，这个解析数据的过程比较浪费时间，所以要开线程来解决这个事。<br>我们跟踪这个<code>previewHanlder</code>可以发现，它是一个<code>DecodeHandler</code>，其中有个重要的<code>decode</code>函数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">decode</span><span class="params">(<span class="keyword">byte</span>[] data, <span class="keyword">int</span> width, <span class="keyword">int</span> height)</span> </span>&#123;</div><div class="line">    <span class="keyword">long</span> start = System.currentTimeMillis();</div><div class="line">    Result rawResult = <span class="keyword">null</span>;</div><div class="line">    PlanarYUVLuminanceSource source = activity.getCameraManager().buildLuminanceSource(data, width, height);</div><div class="line">    <span class="keyword">if</span> (source != <span class="keyword">null</span>) &#123;</div><div class="line">        BinaryBitmap bitmap = <span class="keyword">new</span> BinaryBitmap(<span class="keyword">new</span> HybridBinarizer(source));</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            rawResult = multiFormatReader.decodeWithState(bitmap);</div><div class="line">        &#125; <span class="keyword">catch</span> (ReaderException re) &#123;</div><div class="line">            <span class="comment">// continue</span></div><div class="line">        &#125; <span class="keyword">finally</span> &#123;</div><div class="line">            multiFormatReader.reset();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    Handler handler = activity.getHandler();</div><div class="line">    <span class="keyword">if</span> (rawResult != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">// Don't log the barcode contents for security.</span></div><div class="line">        <span class="keyword">long</span> end = System.currentTimeMillis();</div><div class="line">        Log.d(TAG, <span class="string">"Found barcode in "</span> + (end - start) + <span class="string">" ms"</span>);</div><div class="line">        <span class="keyword">if</span> (handler != <span class="keyword">null</span>) &#123;</div><div class="line">            Message message = Message.obtain(handler, R.id.decode_succeeded, rawResult);</div><div class="line">            Bundle bundle = <span class="keyword">new</span> Bundle();</div><div class="line">            bundleThumbnail(source, bundle);</div><div class="line">            message.setData(bundle);</div><div class="line">            message.sendToTarget();</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">if</span> (handler != <span class="keyword">null</span>) &#123;</div><div class="line">            Message message = Message.obtain(handler, R.id.decode_failed);</div><div class="line">            message.sendToTarget();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里用到我们刚刚重写的<code>buildLuminanceSource</code>这个函数了，可以理解这个函数是对我们的原始数据做一个包装，来给解析器读取。</p>
+<p>解析器的配置我们可以看看<code>DecodeThread</code>这个类（专门用于解析图像的线程）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line"> decodeFormats = EnumSet.noneOf(BarcodeFormat.class);</div><div class="line">decodeFormats.addAll(DecodeFormatManager.PRODUCT_FORMATS);</div><div class="line">decodeFormats.addAll(DecodeFormatManager.INDUSTRIAL_FORMATS);</div><div class="line">decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);</div><div class="line">decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);</div><div class="line">mHints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);</div></pre></td></tr></table></figure>
+<p>这里我们可以为我们的扫描器加更多格式的支持（比如条形码、二维码、XX码）</p>
+<p><code>zxing</code>是使用List来管理这些解析器，然后每次读取数据，都经过这些解析器过滤一遍，如果解析成功就有结果，否则就没有结果。</p>
+<p>最后我们跟踪<code>R.id.decode_success</code>找到<code>CaptureActivityHandler</code><br>这里的<code>handleMessage</code>中有<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> R.id.decode_succeeded:</div><div class="line">      state = State.SUCCESS;</div><div class="line">      Bundle bundle = message.getData();</div><div class="line">      Bitmap barcode = <span class="keyword">null</span>;</div><div class="line">      <span class="keyword">float</span> scaleFactor = <span class="number">1.0f</span>;</div><div class="line">      <span class="keyword">if</span> (bundle != <span class="keyword">null</span>) &#123;</div><div class="line">          <span class="keyword">byte</span>[] compressedBitmap = bundle.getByteArray(DecodeThread.BARCODE_BITMAP);</div><div class="line">          <span class="keyword">if</span> (compressedBitmap != <span class="keyword">null</span>) &#123;</div><div class="line">              barcode = BitmapFactory.decodeByteArray(compressedBitmap, <span class="number">0</span>, compressedBitmap.length, <span class="keyword">null</span>);</div><div class="line">              <span class="comment">// Mutable copy:</span></div><div class="line">              barcode = barcode.copy(Bitmap.Config.ARGB_8888, <span class="keyword">true</span>);</div><div class="line">          &#125;</div><div class="line">          scaleFactor = bundle.getFloat(DecodeThread.BARCODE_SCALED_FACTOR);</div><div class="line">      &#125;</div><div class="line">      activity.handleDecode((Result) message.obj, barcode, scaleFactor);</div><div class="line">      <span class="keyword">break</span>;</div></pre></td></tr></table></figure></p>
+<p>我们读取<code>Result</code>对象的text成员变量就是我们想要的二维码信息了！最后的工作当然是解析我们的二维码中的URI，然后进行后续的工作啦~</p>
+<blockquote>
+<p><em>PS: 附带二维码扫描的SegmentFault for Android版本 即将上线！！</em></p>
+<p>欢迎关注我<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a> 以及 <a href="http://weibo.com/coffeesherk/home?leftnav=1" target="_blank" rel="external">weibo</a>、<a href="/u/gemini">@Gemini</a></p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-android-zxing';
+          this.page.title = 'Android 扫描二维码的实现（简化zxing）';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/11/26/mi-zhi-rxjava-2/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/09/28/android-cube-demo/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/11/04/android-zxing/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

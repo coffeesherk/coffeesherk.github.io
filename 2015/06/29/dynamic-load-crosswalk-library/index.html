@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="CrossWalk - android 动态加载so库文件实践"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>CrossWalk - android 动态加载so库文件实践 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            CrossWalk - android 动态加载so库文件实践
+            
+          </h1>
+          <p class="posted-on">
+          2015-06-29
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>之前看到<code>简书</code>Android客户端使用的编辑器，甚是喜欢，它的优雅以及高性能的特点让我爱不释手，很想自己也去做一个。<br>此前实现过一个在Android上的<a href="https://github.com/geminiwen/gm-mkdroid" target="_blank" rel="external">Markdown编辑器</a><br>但是界面以及<code>所见即所得</code>的效果非常不好看，所以一直耿耿于怀。</p>
+<a id="more"></a>
+<p>然后冒昧看了下<code>简书</code>的布局系统，看见了几个奇怪的类，包括类似<code>XWalkContentView</code>，于是Google了下，就查到了<code>CrossWalk</code>这个<code>hybrid</code>框架了。第一眼并不觉得它有啥不一样，以为是一个<code>Cordova</code>的轮子。后来细看，发现是自个儿编辑了整个<code>Chrominum</code>，屌屌屌!</p>
+<p>运行个demo，wrapper了一个<a href="http://sf.gg" target="_blank" rel="external">http://sf.gg</a> 发现体验真的是不错啊，webview性能到这个水平内心都宽慰了，但是为何安装速度那么慢呢？一看apk大小，足足有<code>40M+</code>，感觉天都要塌了。<code>SegmentFault for Android</code> 客户端才<code>3.03M</code>，我要是包上这玩意，估计就没多少人下了吧。。。然后又看看<code>简书</code>，整个apk大小才8M，在启动编辑器的时候，提示需要下载编辑器，下载了一会，然后再打开。顿时就明白了，看来它的库是从外部载入的，记得以前看到过从外部加载<code>动态链接库</code>想想很是简单，于是入坑了。</p>
+<p>好嘛，我把so文件先不放进apk中，让apk装好之后，放入<code>/data/data/&lt;app&gt;/lib</code>目录下，启动app，直接crash。<br>看日志入下:</p>
+<blockquote>
+<p>DavlikDexClassLoader Unsatisfied Link library[‘/xxxx/xxx.apk’, ‘/vendor/lib’, ‘/system/lib’]</p>
+</blockquote>
+<p>一看这个路径，泪奔了，原来<code>library path</code>只有三个路径下去检查，算了，我们不是有<code>System.load</code>和<code>System.loadLibrary</code>函数么，直接调用呗，于是我就先暂时把绝对路径给写了下来，直接调用<code>System.load</code>函数。</p>
+<p>再次启动，发现<code>CrossWalk</code>报<code>Shared Library should use SharedXWalkView</code>。但是使用<code>SharedXWalkView</code>有许多的限制，比如需要安装一个<code>CrossWalk Runtime</code>的apk，奇怪了，它怎么知道我是用<code>Shared Library</code>的呢？而且简书也没有说要安装apk啊。</p>
+<p>于是我继续研究，开始看<code>CrossWalk</code>的源码，找到<code>ReflectionHelper</code>这个类里面有一行代码<code>shouldUseLibrary()</code>，它会去调用<code>System.loadLibrary()</code>如果没有报异常，则返回<code>false</code>，否则返回<code>true</code>。</p>
+<p>我们知道<code>System.loadLibrary</code>这个函数，会去<code>java.library.path</code>这个环境变量的路径下面寻找库，而<code>Android</code>是不允许我们更改这个环境变量的值的，就导致<code>CrossWalk</code>认为并没有加载它的<code>runtime</code>而去开启<code>Shared</code>模式。</p>
+<p>OK，知道怎么解决就方便了，首先，我们要把<code>so</code>文件放入到<code>/data/data/&lt;app&gt;/</code>下的任意路径，因为我们的apk有这个权限在这里放东西，然后使用<code>System.load</code>加载这个<code>so</code>库，最后使用反射的方式欺骗<code>CrossWalk</code>框架，告诉它我们的类库已经加载完毕。</p>
+<p>我们仔细研究下它的源码，发现有几个标志位需要更改，具体代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">System.load(libPath);</div><div class="line">try &#123;</div><div class="line">    LibraryLoader loader = LibraryLoader.get(1);</div><div class="line">    Class c = Class.forName(&quot;org.xwalk.core.internal.XWalkViewDelegate&quot;);</div><div class="line">    Field field = c.getDeclaredField(&quot;sLibraryLoaded&quot;);</div><div class="line">    field.setAccessible(true);</div><div class="line">    field.setBoolean(null, true);</div><div class="line">    field.setAccessible(false);</div><div class="line"></div><div class="line">    field = LibraryLoader.class.getDeclaredField(&quot;mLoaded&quot;);</div><div class="line">    field.setAccessible(true);</div><div class="line">    field.setBoolean(loader, true);</div><div class="line">    field.setAccessible(false);</div><div class="line">    PathUtils.setPrivateDataDirectorySuffix(&quot;xwalkcore&quot;);</div><div class="line"></div><div class="line">&#125; catch (NoSuchFieldException e) &#123;</div><div class="line">    e.printStackTrace();</div><div class="line">&#125; catch (IllegalAccessException e) &#123;</div><div class="line">    e.printStackTrace();</div><div class="line">&#125; catch (ClassNotFoundException e) &#123;</div><div class="line">    e.printStackTrace();</div><div class="line">&#125; catch (ProcessInitException e) &#123;</div><div class="line">    e.printStackTrace();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>只要把以上的类中的标志位更改掉，那么<code>CrossWalk</code>就认为库已经加载成功了。</p>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-dynamic-load-crosswalk-library';
+          this.page.title = 'CrossWalk - android 动态加载so库文件实践';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/07/03/how-to-develop-android-one/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/06/09/coordinatorlayout-of-android/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/06/29/dynamic-load-crosswalk-library/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

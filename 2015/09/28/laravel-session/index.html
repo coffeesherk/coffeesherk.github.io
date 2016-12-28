@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Laravel 的 Session机制简介"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Laravel 的 Session机制简介 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Laravel 的 Session机制简介
+            
+          </h1>
+          <p class="posted-on">
+          2015-09-28
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>前些天，为了解答一个问题，就去研究了Laravel的源码，讲讲我的收获：<br>这个是问题源：<br><a href="http://segmentfault.com/q/1010000003776645?_ea=365137" target="_blank" rel="external">http://segmentfault.com/q/1010000003776645?_ea=365137</a><br><a id="more"></a></p>
+<p>本文讲的<code>Laravel</code>全部使用<code>5.1</code>版本。</p>
+<p>我们首先看Laravel是如何创建Session组件的。<br>首先我们可以看见在<code>Kernel.php</code>中注册了<code>StartSession</code>这个类（这里不去讨论Laravel的DI和IoC），看下这个类是如何使用的。</p>
+<h2 id="Session-Start"><a href="#Session-Start" class="headerlink" title="Session Start"></a>Session Start</h2><p>我们在这个类中的<code>handle</code>方法看到如下代码<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">handle</span><span class="params">($request, Closure $next)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">$this</span>-&gt;sessionHandled = <span class="keyword">true</span>;</div><div class="line"></div><div class="line">    <span class="comment">// If a session driver has been configured, we will need to start the session here</span></div><div class="line">    <span class="comment">// so that the data is ready for an application. Note that the Laravel sessions</span></div><div class="line">    <span class="comment">// do not make use of PHP "native" sessions in any way since they are crappy.</span></div><div class="line">    <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;sessionConfigured()) &#123;</div><div class="line">        $session = <span class="keyword">$this</span>-&gt;startSession($request);</div><div class="line"></div><div class="line">        $request-&gt;setSession($session);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    $response = $next($request);</div><div class="line"></div><div class="line">    <span class="comment">// Again, if the session has been configured we will need to close out the session</span></div><div class="line">    <span class="comment">// so that the attributes may be persisted to some storage medium. We will also</span></div><div class="line">    <span class="comment">// add the session identifier cookie to the application response headers now.</span></div><div class="line">    <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;sessionConfigured()) &#123;</div><div class="line">        <span class="keyword">$this</span>-&gt;storeCurrentUrl($request, $session);</div><div class="line"></div><div class="line">        <span class="keyword">$this</span>-&gt;collectGarbage($session);</div><div class="line"></div><div class="line">        <span class="keyword">$this</span>-&gt;addCookieToResponse($response, $session);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> $response;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>OK，一个典型的过滤器，在这个<code>StartSession</code>中获取Session的方法是<code>getSession</code>。</p>
+<h2 id="Get-Session"><a href="#Get-Session" class="headerlink" title="Get Session"></a>Get Session</h2><p>它使用了<code>Laravel</code>注入的<code>SessionManager</code> 这个类的完整限定名是：<code>\Illuminate\Session\SessionManager</code><br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Start the session for the given request.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@param</span>  \Illuminate\Http\Request  $request</div><div class="line"> * <span class="doctag">@return</span> \Illuminate\Session\SessionInterface</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">startSession</span><span class="params">(Request $request)</span></span></div><div class="line">&#123;</div><div class="line">    with($session = <span class="keyword">$this</span>-&gt;getSession($request))-&gt;setRequestOnHandler($request);</div><div class="line"></div><div class="line">    $session-&gt;start();</div><div class="line"></div><div class="line">    <span class="keyword">return</span> $session;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Get the session implementation from the manager.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@param</span>  \Illuminate\Http\Request  $request</div><div class="line"> * <span class="doctag">@return</span> \Illuminate\Session\SessionInterface</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getSession</span><span class="params">(Request $request)</span></span></div><div class="line">&#123;</div><div class="line">    $session = <span class="keyword">$this</span>-&gt;manager-&gt;driver();</div><div class="line">    $session-&gt;setId($request-&gt;cookies-&gt;get($session-&gt;getName()));</div><div class="line"></div><div class="line">    <span class="keyword">return</span> $session;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们在这个函数中看到，它调用了<code>SessionManager</code>的<code>drive</code>方法，<code>drive</code>方法是<code>SessionManager</code>的父类<code>Manager</code>中定义的，看到它的实现是这样的</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Get a driver instance.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@param</span>  string  $driver</div><div class="line"> * <span class="doctag">@return</span> mixed</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">driver</span><span class="params">($driver = null)</span></span></div><div class="line">&#123;</div><div class="line">    $driver = $driver ?: <span class="keyword">$this</span>-&gt;getDefaultDriver();</div><div class="line"></div><div class="line">    <span class="comment">// If the given driver has not been created before, we will create the instances</span></div><div class="line">    <span class="comment">// here and cache it so we can return it next time very quickly. If there is</span></div><div class="line">    <span class="comment">// already a driver created by this name, we'll just return that instance.</span></div><div class="line">    <span class="keyword">if</span> (! <span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;drivers[$driver])) &#123;</div><div class="line">        <span class="keyword">$this</span>-&gt;drivers[$driver] = <span class="keyword">$this</span>-&gt;createDriver($driver);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;drivers[$driver];</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Create a new driver instance.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@param</span>  string  $driver</div><div class="line"> * <span class="doctag">@return</span> mixed</div><div class="line"> *</div><div class="line"> * <span class="doctag">@throws</span> \InvalidArgumentException</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">createDriver</span><span class="params">($driver)</span></span></div><div class="line">&#123;</div><div class="line">    $method = <span class="string">'create'</span>.ucfirst($driver).<span class="string">'Driver'</span>;</div><div class="line"></div><div class="line">    <span class="comment">// We'll check to see if a creator method exists for the given driver. If not we</span></div><div class="line">    <span class="comment">// will check for a custom driver creator, which allows developers to create</span></div><div class="line">    <span class="comment">// drivers using their own customized driver creator Closure to create it.</span></div><div class="line">    <span class="keyword">if</span> (<span class="keyword">isset</span>(<span class="keyword">$this</span>-&gt;customCreators[$driver])) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;callCustomCreator($driver);</div><div class="line">    &#125; <span class="keyword">elseif</span> (method_exists(<span class="keyword">$this</span>, $method)) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;$method();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> InvalidArgumentException(<span class="string">"Driver [$driver] not supported."</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>也就是调用<code>getDefaultDriver</code>方法<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Get the default session driver name.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@return</span> string</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getDefaultDriver</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;app[<span class="string">'config'</span>][<span class="string">'session.driver'</span>];</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里就是我们在<code>app/config/session.php</code>中定义的<code>driver</code>字段，获取这个字段后，我们可以从<code>createDriver</code>的源码看到，它实际上是调用<code>createXXXXDriver</code>的方式获取到<code>driver</code>的。</p>
+<p>OK，我们看下最简单的<code>File</code>，也就是<code>createFileDriver</code><br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Create an instance of the file session driver.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@return</span> \Illuminate\Session\Store</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">createFileDriver</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;createNativeDriver();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Create an instance of the file session driver.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@return</span> \Illuminate\Session\Store</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">createNativeDriver</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    $path = <span class="keyword">$this</span>-&gt;app[<span class="string">'config'</span>][<span class="string">'session.files'</span>];</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;buildSession(<span class="keyword">new</span> FileSessionHandler(<span class="keyword">$this</span>-&gt;app[<span class="string">'files'</span>], $path));</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Build the session instance.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@param</span>  \SessionHandlerInterface  $handler</div><div class="line"> * <span class="doctag">@return</span> \Illuminate\Session\Store</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">buildSession</span><span class="params">($handler)</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">if</span> (<span class="keyword">$this</span>-&gt;app[<span class="string">'config'</span>][<span class="string">'session.encrypt'</span>]) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> EncryptedStore(</div><div class="line">            <span class="keyword">$this</span>-&gt;app[<span class="string">'config'</span>][<span class="string">'session.cookie'</span>], $handler, <span class="keyword">$this</span>-&gt;app[<span class="string">'encrypter'</span>]</div><div class="line">        );</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Store(<span class="keyword">$this</span>-&gt;app[<span class="string">'config'</span>][<span class="string">'session.cookie'</span>], $handler);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这个<code>Store</code>就是我们<code>Session</code>的实体了，它的具体读写调用使用抽象的<code>Handler</code>进行，也就是说如果是读文件，就<code>new FileHandler</code>如果是Redis就是<code>new RedisHandler</code>实现<code>read</code>和<code>write</code>即可。</p>
+<h2 id="Session-ID"><a href="#Session-ID" class="headerlink" title="Session ID"></a>Session ID</h2><p>回到<code>StartSession</code> 这个类，我们再看<code>getSession</code>这个方法<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$session-&gt;setId($request-&gt;cookies-&gt;get($session-&gt;getName()));</div></pre></td></tr></table></figure></p>
+<p>了解Web的人都应该知道，session是根据cookie中存的key来区分不同的会话的，所以<code>sessionId</code>尤为重要，这里我们先不关心<code>Cookie</code>是如何读取，我们知道在这里读取了cookie中存放的SessionId就够了。</p>
+<p>接下去看怎么加载数据</p>
+<h2 id="Data"><a href="#Data" class="headerlink" title="Data"></a>Data</h2><p>依然是<code>StartSession</code>这个类，<br>我们看<code>startSession</code>这个方法，下一句调用的就是<code>$session-&gt;start();</code>，这句话是干嘛呢？经过前面的分析，我们知道<code>$session</code>已经是<code>Store</code>对象了，那么它的<code>start</code>方法如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">start</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">$this</span>-&gt;loadSession();</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (! <span class="keyword">$this</span>-&gt;has(<span class="string">'_token'</span>)) &#123;</div><div class="line">        <span class="keyword">$this</span>-&gt;regenerateToken();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;started = <span class="keyword">true</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Load the session data from the handler.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@return</span> void</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">loadSession</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">$this</span>-&gt;attributes = array_merge(<span class="keyword">$this</span>-&gt;attributes, <span class="keyword">$this</span>-&gt;readFromHandler());</div><div class="line"></div><div class="line">    <span class="keyword">foreach</span> (array_merge(<span class="keyword">$this</span>-&gt;bags, [<span class="keyword">$this</span>-&gt;metaBag]) <span class="keyword">as</span> $bag) &#123;</div><div class="line">        <span class="keyword">$this</span>-&gt;initializeLocalBag($bag);</div><div class="line"></div><div class="line">        $bag-&gt;initialize(<span class="keyword">$this</span>-&gt;bagData[$bag-&gt;getStorageKey()]);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"> <span class="comment">/**</span></div><div class="line"> * Read the session data from the handler.</div><div class="line"> *</div><div class="line"> * <span class="doctag">@return</span> array</div><div class="line"> */</div><div class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">readFromHandler</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">    $data = <span class="keyword">$this</span>-&gt;handler-&gt;read(<span class="keyword">$this</span>-&gt;getId());</div><div class="line"></div><div class="line">    <span class="keyword">if</span> ($data) &#123;</div><div class="line">        $data = @unserialize(<span class="keyword">$this</span>-&gt;prepareForUnserialize($data));</div><div class="line"></div><div class="line">        <span class="keyword">if</span> ($data !== <span class="keyword">false</span> &amp;&amp; $data !== <span class="keyword">null</span> &amp;&amp; is_array($data)) &#123;</div><div class="line">            <span class="keyword">return</span> $data;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> [];</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>依次调用了<code>loadSession</code>和<code>readFromHandler</code> 好，可以看到从<code>handler</code>中调用了<code>read</code>方法，这个方法就是从我们之前定义的各种<code>handler</code>中读取数据了，它是个抽象方法，在子类中具体实现，然后返回给Store（存入到<code>Store</code>中的<code>attributes</code>数组中去了，到此为止，<code>Session</code>的初始化方法都结束了，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">public function get($name, $default = null)</div><div class="line">&#123;</div><div class="line">    return Arr::get($this-&gt;attributes, $name, $default);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这个函数去读取<code>Session</code>中的数据了。</p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>OK，Session整个初始化的过程总结下：</p>
+<blockquote>
+<p><code>StartSession</code>#<code>handle</code> -&gt; <code>StartSession</code>#<code>startSession</code> -&gt; <code>StartSession</code>#<code>getSession</code> -&gt; <code>SessionManager</code>#<code>getDefaultDriver</code> -&gt; <code>SessionManager</code>#<code>createXXXHandler</code> -&gt; <code>Store</code> -&gt; <code>Store</code>#<code>setId</code> -&gt; <code>Store</code>#<code>startSession</code></p>
+</blockquote>
+<p><code>Laravel</code>巧妙的使用了面向对象的<code>接口</code>方式，为我们提供了各种各样不同的存储方式，一旦我们了解了存储方式和加密规则，让不同的web容器进行<code>Session</code>共享的目的也可以达到~</p>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-laravel-session';
+          this.page.title = 'Laravel 的 Session机制简介';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/09/28/android-cube-demo/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/09/17/write-native-node-module/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/09/28/laravel-session/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

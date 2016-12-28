@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Android Support Design 中 CoordinatorLayout 与 Behaviors 初探"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Android Support Design 中 CoordinatorLayout 与 Behaviors 初探 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Android Support Design 中 CoordinatorLayout 与 Behaviors 初探
+            
+          </h1>
+          <p class="posted-on">
+          2015-06-09
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>在<code>Android M Preview</code>发布后，我们获得了一个新的<code>support library</code> —— <code>Android Design Support Library</code> 用来实现Google的<code>Material Design</code> 提供了一系列符合设计标准的控件。</p>
+<a id="more"></a>
+<p>其中有众多的控件，其中最复杂，功能最强大的就是<code>CoordinatorLayout</code>，顾名思义，它是用来组织它的子views之间协作的一个父view。CoordinatorLayout默认情况下可理解是一个<code>FrameLayout</code>，它的布局方式默认是一层一层叠上去。<br>那么，<code>CoordinatorLayout</code>的神奇之处就在于<code>Behavior</code>对象了。<br>看下<code>CoordinatorLayout.Behavior</code>对象的 Overview</p>
+<blockquote>
+<p>Interaction behavior plugin for child views of CoordinatorLayout.</p>
+<p>A Behavior implements one or more interactions that a user can take on a child view. These interactions may include drags, swipes, flings, or any other gestures.</p>
+</blockquote>
+<p>可知<code>Behavior</code>对象是用来给CoordinatorLayout的子view们进行交互用的。<br><code>Behavior</code>接口拥有很多个方法，我们拿<code>AppBarLayout</code>为例。<code>AppBarLayout</code>中有两个<code>Behavior</code>，一个是拿来给它自己用的，另一个是拿来给它的兄弟结点用的，我们重点关注下<code>AppBarLayout.ScrollingViewBehavior</code>这个类。</p>
+<p>我们看下这个类中的以下方法</p>
+<h3 id="0-dependency"><a href="#0-dependency" class="headerlink" title="0. dependency"></a>0. dependency</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">layoutDependsOn</span><span class="params">(CoordinatorLayout parent, View child, View dependency)</span>     </span>&#123;</div><div class="line">    <span class="keyword">return</span> dependency <span class="keyword">instanceof</span> AppBarLayout;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法告诉<code>CoordinatorLayout</code>，这个view是依赖<code>AppBarLayout</code>的，后续父亲可以利用这个方法，查找到这个child所有依赖的兄弟结点。</p>
+<h3 id="1-measure"><a href="#1-measure" class="headerlink" title="1. measure"></a>1. measure</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onMeasureChild</span><span class="params">(CoordinatorLayout parent, View child, <span class="keyword">int</span> parentWidthMeasureSpec, <span class="keyword">int</span> widthUsed, <span class="keyword">int</span> parentHeightMeasureSpec, <span class="keyword">int</span> heightUsed)</span></span></div></pre></td></tr></table></figure>
+<p>这个是<code>CoordinatorLayout</code>在进行<code>measure</code>的过程中，利用<code>Behavior</code>对象对子view进行大小测量的一个方法。<br>在这个方法内，我们可以通过<code>parent.getDependencies(child);</code>这个方法，获取到这个child依赖的view，然后通过获取这个child依赖的view的大小来决定自身的大小。</p>
+<h3 id="2-layout"><a href="#2-layout" class="headerlink" title="2. layout"></a>2. layout</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onLayoutChild</span><span class="params">(CoordinatorLayout parent, View child, <span class="keyword">int</span> layoutDirection)</span></span></div></pre></td></tr></table></figure>
+<p>这个方法是用来子view用来布局自身使用，如果依赖其他view，那么系统会首先调用<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onDependentViewChanged</span><span class="params">(CoordinatorLayout parent, View child, View dependency)</span></span></div></pre></td></tr></table></figure></p>
+<p>这个方法，可以在这个回调中记录<code>dependency</code>的一些位置信息，在<code>onLayoutChild</code>中利用保存下来的信息进行计算，然后得到自身的具体位置。</p>
+<h3 id="3-nested-scroll"><a href="#3-nested-scroll" class="headerlink" title="3. nested scroll"></a>3. nested scroll</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onStartNestedScroll</span><span class="params">(CoordinatorLayout coordinatorLayout, AppBarLayout child, View directTargetChild, View target, <span class="keyword">int</span> nestedScrollAxes)</span></span></div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNestedPreScroll</span><span class="params">(CoordinatorLayout coordinatorLayout, AppBarLayout child, View target, <span class="keyword">int</span> dx, <span class="keyword">int</span> dy, <span class="keyword">int</span>[] consumed)</span></span></div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNestedScroll</span><span class="params">(CoordinatorLayout coordinatorLayout, AppBarLayout child, View target, <span class="keyword">int</span> dxConsumed, <span class="keyword">int</span> dyConsumed, <span class="keyword">int</span> dxUnconsumed, <span class="keyword">int</span> dyUnconsumed)</span></span></div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onStopNestedScroll</span><span class="params">(CoordinatorLayout coordinatorLayout, AppBarLayout child, View target)</span></span></div></pre></td></tr></table></figure>
+<p>这几个方法是不是特别熟悉？我在<a href="http://segmentfault.com/a/1190000002873657" target="_blank" rel="external">Android嵌套滑动机制（NestedScrolling）</a> 介绍过，这几个方法刚好是<code>NestedScrollingParent</code>的方法，也就是对<code>CoodinatorLayout</code>进行的一个代理（Proxy），即<code>CoordinatorLayout</code>自己不对这些消息进行处理，而是传递给子view的<code>Behavior</code>，进行处理。利用这样的方法，实现了view和view之间的交互和视觉的协同（布局、滑动）。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>可以看到<code>CoodinatorLayout</code>给我们实现了一个可以被子view代理实现方法的一个布局。这和传统的<code>ViewGroup</code>不同，子view从此知道了彼此之间的存在，一个子view的变化可以通知到另一个子view。<code>CoordinatorLayout</code>所做的事情就是当成一个通信的<code>桥梁</code>，连接不同的view。使用<code>Behavior</code>对象进行通信。</p>
+<p>我们具体的实现可以参照 Android官方文档告诉我们的每一个方法的作用 进行重写，实现自己想要的各种复杂的功能。<br><a href="https://developer.android.com/reference/android/support/design/widget/CoordinatorLayout.Behavior.html" target="_blank" rel="external">https://developer.android.com/reference/android/support/design/widget/CoordinatorLayout.Behavior.html</a><br>有了这么一套机制，想实现组件之间的交互，就更加方便快捷啦~</p>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-coordinatorlayout-of-android';
+          this.page.title = 'Android Support Design 中 CoordinatorLayout 与 Behaviors 初探';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/06/29/dynamic-load-crosswalk-library/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/06/03/nestedscrolling-of-android/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/06/09/coordinatorlayout-of-android/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

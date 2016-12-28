@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Android 程序员学习 iOS —— 在线程间跳舞"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Android 程序员学习 iOS —— 在线程间跳舞 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Android 程序员学习 iOS —— 在线程间跳舞
+            
+          </h1>
+          <p class="posted-on">
+          2016-02-28
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+                <a href="/tags/ios/" rel="tag">
+                  ios
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>在客户端开发的过程中，我们经常碰到的问题有可能就是 IO 请求完成后，在主线程中更新 UI 这件事了，看见这个问题，我们一般会直接想到 <code>Handler</code>这个大杀器，<br><a id="more"></a></p>
+<p><code>Android</code> 中我们知道有<code>Looper</code>和<code>Handler</code>这两种神器帮我们完成不同线程间的调度，那么在<code>iOS</code>中如何实现不同线程间的切换呢？答案就是<code>NSOperationQueue</code>和<code>NSOperation</code>。变量名字直接翻译就是<code>操作队列</code>和<code>操作</code>，那么，更新 UI 就是一个<code>操作</code>。 因为<code>Objective-C</code>带了<code>block</code>和<code>selector</code>两个神器，使用闭包比在<code>java</code>中使用<code>Runnable</code>方便许多，所以我们的<code>NSOperation</code>更像是一个<code>Runnable</code>，而<code>NSOperationQueue</code>就像<code>Looper</code>和<code>Handler</code>的结合体，我们来看看如何创建一个 UI 线程上的消息队列吧。</p>
+<h2 id="主线程上的消息队列"><a href="#主线程上的消息队列" class="headerlink" title="主线程上的消息队列"></a>主线程上的消息队列</h2><p>创建一个主线程上的消息队列，只用一条函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSOperationQueue *queue = [NSOperationQueue mainQueue];</div></pre></td></tr></table></figure></p>
+<p>这和<code>java</code>创建一个<code>mainLooper</code>上的<code>Handler</code>如出一辙：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Handler uiHandler = new Handler(Looper.mainLooper());</div></pre></td></tr></table></figure>
+<p>从客户端的层面上来说，这两句话是等价的。<br>然后我们调用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[queue addOperation:...]</div></pre></td></tr></table></figure></p>
+<p>传入一个<code>Operation</code>，OS就会在适当的时候，在主线程上回调我们的<code>Operation</code>，这和<code>Handler</code>调用<code>handlerMessage</code>是如何的一致啊~</p>
+<h2 id="子线程上的消息队列"><a href="#子线程上的消息队列" class="headerlink" title="子线程上的消息队列"></a>子线程上的消息队列</h2><p>那么，如何在子线程上调用一个<code>NSOperation</code>呢？<br>我们知道在<code>Android</code>中，需要将<code>Handler</code>的初始化运行在子线程上，因为这样才能用<code>Looper.myLooper()</code>获取线程本地变量实例。<br>但是在iOS中，我们不需要显示的在一条新的线程中完成我们的工作，我们只需要使用传统的分配对象的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">NSOperationQueue *queue = [NSOperationQueue mainQueue];</div></pre></td></tr></table></figure>
+<p>OS这时候已经自动帮我们分配了一个消息队列（<strong>但是不同的是，它并不像Android OS上一样，是绑定到线程上的，也就是说，这个消息队列，可以并发</strong>），我们只需要像上面一样，使用<code>[queue addOperation:...]</code>即可。</p>
+<h2 id="实验"><a href="#实验" class="headerlink" title="实验"></a>实验</h2><p>我们来看看实例好了，先看<code>mainQueue</code>上的实验：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">self.queue = [NSOperationQueue mainQueue];</div><div class="line">[self.queue addOperation:[NSBlockOperation blockOperationWithBlock:^() &#123;</div><div class="line">        NSLog(@&quot;%@&quot;, [NSThread currentThread]);</div><div class="line">&#125;]];</div></pre></td></tr></table></figure></p>
+<p>Output:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">2016-02-28 15:10:38.813 OperationQueue[1277:52212] &lt;NSThread: 0x7fd44a505670&gt;&#123;number = 1, name = main&#125;</div></pre></td></tr></table></figure></p>
+<p>看到我们这个<code>block</code>的执行的确是在主线程上的。<br>然后看新的消息队列：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">self.queue = [[NSOperationQueue alloc] init];</div><div class="line">[self.queue addOperation:[NSBlockOperation blockOperationWithBlock:^() &#123;</div><div class="line">        NSLog(@&quot;%@&quot;, [NSThread currentThread]);</div><div class="line">&#125;]];</div></pre></td></tr></table></figure></p>
+<p>Output:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">2016-02-28 15:23:03.954 OperationQueue[1375:64592] &lt;NSThread: 0x7fe10b5136d0&gt;&#123;number = 2, name = (null)&#125;</div></pre></td></tr></table></figure></p>
+<p>这就不是在主线程了，那么在<code>iOS</code>上使用”<code>Handler</code>“或者说消息队列的方法就是这么简单啦~</p>
+<h2 id="One-more-thing-——-队列和线程的绑定"><a href="#One-more-thing-——-队列和线程的绑定" class="headerlink" title="One more thing —— 队列和线程的绑定"></a>One more thing —— 队列和线程的绑定</h2><p>上一个章节我们说，在iOS中，线程和队列并不是一一对应绑定的，我们可以简单的理解成在<code>iOS</code>中，除了<code>main queue</code>以外，自己生成的队列是可以<strong>并发</strong>的，简单的操作就是在生成队列的时候，指定<code>maxConcurrentOperationCount</code>属性即可，我们的<code>操作队列</code>就具有了并发的功能（不过这样严格意义上就不是FIFO，也就是说，它其实不应该被称作”队列”了）</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p><a href="https://github.com/MacRuby/MacRuby/wiki/Working-with-NSOperationQueue" target="_blank" rel="external">Working with NSOperationQueue</a></p>
+<p><a href="https://developer.apple.com/library/prerelease/ios/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40008091" target="_blank" rel="external">Apple官方教程 —— Concurrency Programming Guide</a></p>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-android-programmer-learn-ios-3';
+          this.page.title = 'Android 程序员学习 iOS —— 在线程间跳舞';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2016/04/03/mi-zhi-rxjava-5/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2016/01/07/android-programmer-learn-ios-2/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2016/02/28/android-programmer-learn-ios-3/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

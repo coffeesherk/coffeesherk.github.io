@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Android 实现一个立方体旋转效果"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Android 实现一个立方体旋转效果 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Android 实现一个立方体旋转效果
+            
+          </h1>
+          <p class="posted-on">
+          2015-09-28
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>好久不见~</p>
+<p>今天我们来看看如何实现一个立方体翻转的效果。<br><a id="more"></a></p>
+<p>如图</p>
+<p><img src="http://ww2.sinaimg.cn/large/5dd54131gw1ewhzt3daq7g20f00qob2a.gif" alt="5dd54131gw1ewhzt3daq7g20f00qob2a.gif"></p>
+<p>看上去很麻烦，实际上实现起来还是蛮轻松的。<br>这里我们使用到的有两个类。</p>
+<ol>
+<li><code>android.graphic.Camera</code> 这是在图像学概念里的摄像机，这是一个<code>透视摄像机</code>。</li>
+<li><code>android.graphic.Matrix</code> 矩阵，用来表示图像的变化。</li>
+</ol>
+<h1 id="头疼的钻研路开始"><a href="#头疼的钻研路开始" class="headerlink" title="头疼的钻研路开始"></a>头疼的钻研路开始</h1><p>我们先从摄像头上的角度分析：<br>正常情况下，我们是这么看画面的（那个电池一样的东西就当是摄像头吧）</p>
+<p><img src="https://segmentfault.com/img/bVp6Nm" alt="clipboard.png"><br>我们要产生立方体的效果，那逻辑上应该是这么看：<br><img src="https://segmentfault.com/img/bVp6Nv" alt="clipboard.png"></p>
+<p>Camera提供了几个接口，我们这使用到的接口有两个：</p>
+<ol>
+<li>Rotate    旋转</li>
+<li>Translate 平移</li>
+</ol>
+<p>这两个函数的操作都对<code>画布</code>的！<br>这里我们首先要有2个View。xml结构入下：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">cn.geminiwen.canvassupport.view.SplashLayout</span></span></div><div class="line">        <span class="attr">android:text</span>=<span class="string">"@string/hello_world"</span></div><div class="line">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">        <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></div><div class="line">        <span class="attr">android:background</span>=<span class="string">"#000"</span> &gt;</div><div class="line">        <span class="tag">&lt;<span class="name">RelativeLayout</span></span></div><div class="line">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">            <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></div><div class="line">            <span class="attr">android:background</span>=<span class="string">"#f00"</span>&gt;</div><div class="line">        <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">RelativeLayout</span></span></div><div class="line">            <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">            <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span></div><div class="line">            <span class="attr">android:background</span>=<span class="string">"#0f0"</span>&gt;</div><div class="line">        <span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">cn.geminiwen.canvassupport.view.SplashLayout</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>SplashLayout就是我的自定义布局，用来绘制立方体效果的布局。</p>
+<p>我们把第一个view作为<code>backgroundView</code>，第二个View作为<code>foregroundView</code>，使得效果是从<code>backgroundView</code>翻转到<code>foregroundView</code>。</p>
+<p>具体代码入下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">cube</span><span class="params">(Canvas canvas, <span class="keyword">double</span> interpolation)</span> </span>&#123;</div><div class="line">        View foregroundView = getChildAt(<span class="number">0</span>);</div><div class="line">        View backgroundView = getChildAt(<span class="number">1</span>);</div><div class="line">        <span class="keyword">int</span> width = getWidth();</div><div class="line">        <span class="keyword">int</span> height = getHeight();</div><div class="line">        <span class="keyword">long</span> drawingTime = getDrawingTime();</div><div class="line">        <span class="keyword">float</span> rotate;</div><div class="line"></div><div class="line">        <span class="comment">//begin drawForeground</span></div><div class="line">        rotate = (<span class="keyword">float</span>)(- sFinalDegree * interpolation);</div><div class="line">        mCamera.save();</div><div class="line">        mCamera.translate((<span class="keyword">float</span>)(width - interpolation * width), <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">        mCamera.rotateY(rotate);</div><div class="line">        mCamera.getMatrix(mMatrix);</div><div class="line">        mCamera.restore();</div><div class="line"></div><div class="line">        mMatrix.postTranslate(<span class="number">0</span>, height / <span class="number">2</span>);</div><div class="line">        mMatrix.preTranslate(-width, -height / <span class="number">2</span>);</div><div class="line">        canvas.save();</div><div class="line">        canvas.concat(mMatrix);</div><div class="line">        drawChild(canvas, foregroundView, drawingTime);</div><div class="line">        canvas.restore();</div><div class="line">        <span class="comment">//end drawForeground</span></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        <span class="comment">//draw Background</span></div><div class="line">        rotate = (<span class="keyword">float</span>)(sFinalDegree - sFinalDegree * interpolation);</div><div class="line">        mCamera.save();</div><div class="line">        mCamera.translate((<span class="keyword">float</span>)(-width * interpolation), <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">        mCamera.rotateY(rotate);</div><div class="line">        mCamera.getMatrix(mMatrix);</div><div class="line">        mCamera.restore();</div><div class="line"></div><div class="line">        mMatrix.postTranslate(width, height / <span class="number">2</span>);</div><div class="line">        mMatrix.preTranslate(<span class="number">0</span>, -height / <span class="number">2</span>);</div><div class="line">        canvas.save();</div><div class="line">        canvas.concat(mMatrix);</div><div class="line">        drawChild(canvas, backgroundView, drawingTime);</div><div class="line">        canvas.restore();</div><div class="line">        <span class="comment">//end draw Background</span></div><div class="line"></div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>这段代码放到<code>ViewGroup</code>的<code>dispatchDraw</code>方法里即可，因为<code>ViewGroup</code>只能在<code>dispatchDraw</code>方法中绘制子视图。<br>其中，<code>canvas</code>代表画布，<code>interpolation</code>代表动画从0.0 到 1.0 的过程，方便插入器的使用。</p>
+<p>这里来解释下我们的过程。</p>
+<h2 id="View状态变换"><a href="#View状态变换" class="headerlink" title="View状态变换"></a>View状态变换</h2><p>起始状态<code>background</code>是这样的：</p>
+<ol>
+<li>绕Y轴正方向转90度</li>
+<li>画布x轴移动到width的位置。</li>
+</ol>
+<p>可以参照上图中的<code>画布2</code>的状态。</p>
+<p>终点状态是这样：</p>
+<ol>
+<li>绕Y轴正方向0度。</li>
+<li>画布x轴移动到0的位置。</li>
+</ol>
+<p>可以参考上图中的画布的状态。</p>
+<h3 id="旋转问题"><a href="#旋转问题" class="headerlink" title="旋转问题"></a>旋转问题</h3><p>综上所述，我们设置转动角度<code>sFinalDegree</code>为90。<br><code>interpolation</code>从0到1的过程，<br><code>background</code>的rotate就变成了从<code>90</code>到<code>0</code>的过程。</p>
+<h3 id="平移问题"><a href="#平移问题" class="headerlink" title="平移问题"></a>平移问题</h3><p>这时候我们考虑平移的情况，这个情况会比较复杂，因为我们这里有两种平移方式，<code>平移摄像机</code>或者<code>直接平移画布</code>。</p>
+<p>这里我们说下区别，如果移动摄像机，会导致图像的投影发生变化，举个例子：<br>比如我们已经在投影上绕Y轴旋转90度，如果移动X轴的话，看如下图的区别：</p>
+<p>1、未平移摄像机</p>
+<p><img src="https://segmentfault.com/img/bVp6QZ" alt="clipboard.png"></p>
+<p>2、平移摄像机</p>
+<p><img src="https://segmentfault.com/img/bVp6Rb" alt="clipboard.png"><br>从图上我们知道，这个旋转过的画布的前端和后端我们都是可以看见的，这当然不符合我们要求，那么我们直接平移画布是什么意思呢？</p>
+<p>我们知道对摄像机做了操作之后，应用到画布上，实际是画一个画布的投影，直接移动画布的话，就是改变其坐标系系统，达到效果，我们可以理解为同时对摄像机和view进行平移，最终达到的效果就是摄像头相对view的位置和<code>1</code>一样，但是我们的画布却平移了，这就达到了我们最终的要求。</p>
+<p><strong>我们看代码虽然我们平移的是画布，但是我们平移的过程中确是使用移动摄像机的方式来绘制投影，这又是为什么呢？</strong></p>
+<p>我们从三角函数的投影来解释这个问题。<br>首先看见我平移摄像头的方式是线性的，也就是<code>y=kt</code>这种方式，斜率一定，也就是随着时间变化，我平移的距离是线性增加的。那么考虑旋转的时候的投影情况：<br>被旋转的角就是<code>角a</code>，我们的画布长为<code>width</code>，那么画布的投影长度为<br><code>width * cos(a)</code><br><img src="https://segmentfault.com/img/bVp6RF" alt="clipboard.png"><br>它是一个三角函数。变化趋势先快后慢，因此我们在旋转过程中会看见右边露出背景，造成视觉上的不友好，怎么解决这个问题呢？ </p>
+<p>这时候就借助我们的摄像机平移的投影方式。</p>
+<p><img src="https://segmentfault.com/img/bVp6RT" alt="clipboard.png"></p>
+<p>这里绿色的线是我们的投影线，它的投影长度比<code>cos(a) * width</code>要长很多，因此它就可以让我们在旋转过程中不产生黑边，给人视觉上的饱满感，会让我们的视觉效果好很多。</p>
+<p>我们的<code>foregroundView</code>就是一个<code>backgroundView</code>的逆向过程，因此使用类似的代码，然后假设<code>interpolation</code>是从1-0的过程即可，同时它的坐标系整体要往左移动一个屏幕。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>做UI的效果，特别需要一些比较好的数据基础，在图像处理中，搞清楚透视、矩阵的一些计算方式和概念非常重要，今天我们介绍了利用<code>Camera</code>来进行辅助我们进行矩阵的计算。</p>
+<h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><blockquote>
+<p>demo已经放在github上<br>demo已经放在github上<br>demo已经放在github上<br><a href="https://github.com/geminiwen/AndroidCubeDemo" target="_blank" rel="external">https://github.com/geminiwen/AndroidCubeDemo</a> 欢迎star 欢迎fork！</p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-android-cube-demo';
+          this.page.title = 'Android 实现一个立方体旋转效果';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/11/04/android-zxing/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/09/28/laravel-session/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/09/28/android-cube-demo/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

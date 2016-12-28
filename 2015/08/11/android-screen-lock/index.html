@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Android 实现锁屏的较完美方案"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Android 实现锁屏的较完美方案 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Android 实现锁屏的较完美方案
+            
+          </h1>
+          <p class="posted-on">
+          2015-08-11
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>实现锁屏的方法，其实上网一搜一大把，无非是告诉你在<code>Screen Off</code>的时候启动某个Activity，同时把<code>Keyguard</code>禁用掉，但是通常情况下，似乎很难解决<code>HOME</code>键能解锁的这么一个问题，今天我们就来讲一个方案，就是如何近乎完美的实现我们的锁屏。<br><a id="more"></a></p>
+<p>我们知道，锁屏的界面显示是使用<code>KeyguardViewManager</code>进行添加的，但是这个类属于Android的内部类，我们调用不到，它属于<code>com.android.internal.policy.impl</code>这个包，源码地址：<a href="https://github.com/android/platform_frameworks_policies_base/blob/master/phone/com/android/internal/policy/impl/KeyguardViewManager.java" target="_blank" rel="external">https://github.com/android/platform_frameworks_policies_base/blob/master/phone/com/android/internal/policy/impl/KeyguardViewManager.java</a></p>
+<p>我们可以看到它似乎是使用WindowManager添加View的方式实现了锁屏界面的添加，而不是使用传统的Activity的方式。</p>
+<p>那么使用<code>WindowManager</code>是我们可行的方案，它的好处就是可以屏蔽Home键的触发，同时可以做一些特殊的动画效果。</p>
+<p>我们首先开启一个<code>Service</code>，在<code>Service</code>中注册<code>SREEN_OFF</code>的广播，触发广播的时候，使用WindowManager加入锁屏页面，实现锁屏即可。<br>看下我们的Receiver代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (action.equals(Intent.ACTION_SCREEN_OFF)) &#123;</div><div class="line">    ViewParent viewParent = mContainer.getParent();</div><div class="line">    <span class="keyword">if</span> (viewParent != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    mKeyguardLock.disableKeyguard();</div><div class="line">    WindowManager windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);</div><div class="line">    WindowManager.LayoutParams lp = generateLayoutParams();</div><div class="line">    windowManager.addView(mContainer, lp);</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"> <span class="keyword">private</span> WindowManager.<span class="function">LayoutParams <span class="title">generateLayoutParams</span><span class="params">()</span> </span>&#123;</div><div class="line">    WindowManager windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);</div><div class="line">    Display display = windowManager.getDefaultDisplay();</div><div class="line">    Point size = <span class="keyword">new</span> Point();</div><div class="line">    display.getSize(size);</div><div class="line"></div><div class="line">    WindowManager.LayoutParams lp = <span class="keyword">new</span> WindowManager.LayoutParams();</div><div class="line">    lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;</div><div class="line">    lp.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;</div><div class="line">    lp.x = <span class="number">0</span>;</div><div class="line">    lp.y = <span class="number">0</span>;</div><div class="line">    lp.format = PixelFormat.TRANSLUCENT;</div><div class="line">    <span class="keyword">return</span> lp;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里主要的是需要设置WindowManager的布局参数（LayoutParams），如果看WindowManager的源码的话，我们可以看见它的TYPE有一个<code>TYPE_KEYGUARD</code>，这就是系统锁屏用的类型了，但是它不提供给外部使用，因此我们只能使用级别比较高的<code>TYPE_SYSTEM_ALERT</code>，覆盖到锁屏的上面。<code>format</code>设置成<code>TRANSLUCENT</code>的原因是我们需要和锁屏交互的时候，锁屏后面的界面要显示出来，所以它是一个透明的层，这里没有办法，我们只能把一些交互的代码放到需要添加的View层中进行处理。</p>
+<p>使用这种方式实现的锁屏，能较好的和<code>Launcher</code>或者其他界面交互（包括渐变、过渡等），而且能使得我们的锁屏界面不响应<code>HOME</code>键（使用Activity的方式的话，home会让我们进入到<code>Launcher</code>里）。</p>
+<p>更多的内容我正在探索，敬请期待。</p>
+<blockquote>
+<p>欢迎关注我<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a> 以及 <a href="http://weibo.com/coffeesherk/home?leftnav=1" target="_blank" rel="external">@Gemini</a> </p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-android-screen-lock';
+          this.page.title = 'Android 实现锁屏的较完美方案';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/09/17/write-native-node-module/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/08/04/about-skip-list/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/08/11/android-screen-lock/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

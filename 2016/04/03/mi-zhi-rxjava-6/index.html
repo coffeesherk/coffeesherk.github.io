@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="谜之RxJava （三）update 2 —— subscribeOn 和 observeOn 的区别"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>谜之RxJava （三）update 2 —— subscribeOn 和 observeOn 的区别 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            谜之RxJava （三）update 2 —— subscribeOn 和 observeOn 的区别
+            
+          </h1>
+          <p class="posted-on">
+          2016-04-03
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>之前我们分析过<code>subscribeOn</code>这个函数，<br>现在我们来看下<code>subscribeOn</code>和<code>observeOn</code>这两个函数到底有什么异同。<br><a id="more"></a></p>
+<p>用过<code>rxjava</code>的旁友都知道，<code>subscribeOn</code>和<code>observeOn</code>都是用来切换线程用的，可是我什么时候用<code>subscribeOn</code>，什么时候用<code>observeOn</code>呢，我们很少知道这两个区别是啥。</p>
+<blockquote>
+<p>友情提示，如果不想看分析过程的，可以直接跳到下面的总结部分。</p>
+</blockquote>
+<h2 id="subscribeOn"><a href="#subscribeOn" class="headerlink" title="subscribeOn"></a>subscribeOn</h2><p>先看下<code>OperatorSubscribeOn</code>的核心代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">public final class OperatorSubscribeOn&lt;T&gt; implements OnSubscribe&lt;T&gt; &#123;</div><div class="line"></div><div class="line">    final Scheduler scheduler;</div><div class="line">    final Observable&lt;T&gt; source;</div><div class="line"></div><div class="line">    public OperatorSubscribeOn(Observable&lt;T&gt; source, Scheduler scheduler) &#123;</div><div class="line">        this.scheduler = scheduler;</div><div class="line">        this.source = source;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void call(final Subscriber&lt;? super T&gt; subscriber) &#123;</div><div class="line">        final Worker inner = scheduler.createWorker();</div><div class="line">        subscriber.add(inner);</div><div class="line">        </div><div class="line">        inner.schedule(new Action0() &#123;</div><div class="line">        </div><div class="line">            @Override</div><div class="line">            public void call() &#123;</div><div class="line">               </div><div class="line">                Subscriber&lt;T&gt; s = new Subscriber&lt;T&gt;(subscriber) &#123;</div><div class="line">                    @Override</div><div class="line">                    public void onNext(T t) &#123;</div><div class="line">                        subscriber.onNext(t);</div><div class="line">                    &#125;</div><div class="line">                    </div><div class="line">                    @Override</div><div class="line">                    public void onError(Throwable e) &#123;</div><div class="line">                        try &#123;</div><div class="line">                            subscriber.onError(e);</div><div class="line">                        &#125; finally &#123;</div><div class="line">                            inner.unsubscribe();</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                    </div><div class="line">                    @Override</div><div class="line">                    public void onCompleted() &#123;</div><div class="line">                        try &#123;</div><div class="line">                            subscriber.onCompleted();</div><div class="line">                        &#125; finally &#123;</div><div class="line">                            inner.unsubscribe();</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                    </div><div class="line">                    ....</div><div class="line">                &#125;;</div><div class="line">                </div><div class="line">                source.unsafeSubscribe(s);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里注意两点：</p>
+<blockquote>
+<ol>
+<li><p>因为<code>OperatorSubscribeOn</code>是个<code>OnSubscribe</code>对象，所以在<code>call</code>参数中传入的<code>subscriber</code>就是我们在外面使用<code>Observable.subscribe(a)</code>传入的对象<code>a</code>。</p>
+</li>
+<li><p>这里<code>source</code>对象指向的是调用<code>subscribeOn</code>之前的那个<code>Observable</code>序列。</p>
+</li>
+</ol>
+</blockquote>
+<p>明确了这两点，我们就很好的知道了<code>subscribeOn</code>是如何工作，产生神奇的效果了。<br>其实最最主要的就是一行函数</p>
+<blockquote>
+<p>source.unsafeSubscribe(s);</p>
+</blockquote>
+<p>并且要注意它所在的位置，是在worker的<code>call</code>里面，说白了，就是把<code>source.subscribe</code>这一行调用放在指定的线程里，那么总结起来的结论就是：</p>
+<blockquote>
+<p><code>subscribeOn</code>的调用，改变了调用前序列所运行的线程。</p>
+</blockquote>
+<h2 id="observeOn"><a href="#observeOn" class="headerlink" title="observeOn"></a>observeOn</h2><p>同样看下<code>OperatorObserveOn</code>这个类的主要代码:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div><div class="line">219</div><div class="line">220</div><div class="line">221</div><div class="line">222</div><div class="line">223</div><div class="line">224</div><div class="line">225</div><div class="line">226</div><div class="line">227</div><div class="line">228</div><div class="line">229</div><div class="line">230</div></pre></td><td class="code"><pre><div class="line">public final class OperatorObserveOn&lt;T&gt; implements Operator&lt;T, T&gt; &#123;</div><div class="line"></div><div class="line">    private final Scheduler scheduler;</div><div class="line">    private final boolean delayError;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * @param scheduler the scheduler to use</div><div class="line">     * @param delayError delay errors until all normal events are emitted in the other thread?</div><div class="line">     */</div><div class="line">    public OperatorObserveOn(Scheduler scheduler, boolean delayError) &#123;</div><div class="line">        this.scheduler = scheduler;</div><div class="line">        this.delayError = delayError;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public Subscriber&lt;? super T&gt; call(Subscriber&lt;? super T&gt; child) &#123;</div><div class="line">        ....</div><div class="line">        ObserveOnSubscriber&lt;T&gt; parent = new ObserveOnSubscriber&lt;T&gt;(scheduler, child, delayError);</div><div class="line">        parent.init();</div><div class="line">        return parent;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /** Observe through individual queue per observer. */</div><div class="line">    private static final class ObserveOnSubscriber&lt;T&gt; extends Subscriber&lt;T&gt; implements Action0 &#123;</div><div class="line">        final Subscriber&lt;? super T&gt; child;</div><div class="line">        final Scheduler.Worker recursiveScheduler;</div><div class="line">        final NotificationLite&lt;T&gt; on;</div><div class="line">        final boolean delayError;</div><div class="line">        final Queue&lt;Object&gt; queue;</div><div class="line">        </div><div class="line">        // the status of the current stream</div><div class="line">        volatile boolean finished;</div><div class="line"></div><div class="line">        final AtomicLong requested = new AtomicLong();</div><div class="line">        </div><div class="line">        final AtomicLong counter = new AtomicLong();</div><div class="line">        </div><div class="line">        /** </div><div class="line">         * The single exception if not null, should be written before setting finished (release) and read after</div><div class="line">         * reading finished (acquire).</div><div class="line">         */</div><div class="line">        Throwable error;</div><div class="line"></div><div class="line">        // do NOT pass the Subscriber through to couple the subscription chain ... unsubscribing on the parent should</div><div class="line">        // not prevent anything downstream from consuming, which will happen if the Subscription is chained</div><div class="line">        public ObserveOnSubscriber(Scheduler scheduler, Subscriber&lt;? super T&gt; child, boolean delayError) &#123;</div><div class="line">            this.child = child;</div><div class="line">            this.recursiveScheduler = scheduler.createWorker();</div><div class="line">            this.delayError = delayError;</div><div class="line">            this.on = NotificationLite.instance();</div><div class="line">            if (UnsafeAccess.isUnsafeAvailable()) &#123;</div><div class="line">                queue = new SpscArrayQueue&lt;Object&gt;(RxRingBuffer.SIZE);</div><div class="line">            &#125; else &#123;</div><div class="line">                queue = new SpscAtomicArrayQueue&lt;Object&gt;(RxRingBuffer.SIZE);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        void init() &#123;</div><div class="line">            // don&apos;t want this code in the constructor because `this` can escape through the </div><div class="line">            // setProducer call</div><div class="line">            Subscriber&lt;? super T&gt; localChild = child;</div><div class="line">            </div><div class="line">            localChild.setProducer(new Producer() &#123;</div><div class="line"></div><div class="line">                @Override</div><div class="line">                public void request(long n) &#123;</div><div class="line">                    if (n &gt; 0L) &#123;</div><div class="line">                        BackpressureUtils.getAndAddRequest(requested, n);</div><div class="line">                        schedule();</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">            &#125;);</div><div class="line">            localChild.add(recursiveScheduler);</div><div class="line">            localChild.add(this);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public void onStart() &#123;</div><div class="line">            // signal that this is an async operator capable of receiving this many</div><div class="line">            request(RxRingBuffer.SIZE);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public void onNext(final T t) &#123;</div><div class="line">            if (isUnsubscribed() || finished) &#123;</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            if (!queue.offer(on.next(t))) &#123;</div><div class="line">                onError(new MissingBackpressureException());</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            schedule();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public void onCompleted() &#123;</div><div class="line">            if (isUnsubscribed() || finished) &#123;</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            finished = true;</div><div class="line">            schedule();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public void onError(final Throwable e) &#123;</div><div class="line">            if (isUnsubscribed() || finished) &#123;</div><div class="line">                RxJavaPlugins.getInstance().getErrorHandler().handleError(e);</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            error = e;</div><div class="line">            finished = true;</div><div class="line">            schedule();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        protected void schedule() &#123;</div><div class="line">            if (counter.getAndIncrement() == 0) &#123;</div><div class="line">                recursiveScheduler.schedule(this);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // only execute this from schedule()</div><div class="line">        @Override</div><div class="line">        public void call() &#123;</div><div class="line">            long emitted = 0L;</div><div class="line"></div><div class="line">            long missed = 1L;</div><div class="line"></div><div class="line">            // these are accessed in a tight loop around atomics so</div><div class="line">            // loading them into local variables avoids the mandatory re-reading</div><div class="line">            // of the constant fields</div><div class="line">            final Queue&lt;Object&gt; q = this.queue;</div><div class="line">            final Subscriber&lt;? super T&gt; localChild = this.child;</div><div class="line">            final NotificationLite&lt;T&gt; localOn = this.on;</div><div class="line">            </div><div class="line">            // requested and counter are not included to avoid JIT issues with register spilling</div><div class="line">            // and their access is is amortized because they are part of the outer loop which runs</div><div class="line">            // less frequently (usually after each RxRingBuffer.SIZE elements)</div><div class="line">            </div><div class="line">            for (;;) &#123;</div><div class="line">                long requestAmount = requested.get();</div><div class="line">                long currentEmission = 0L;</div><div class="line">                </div><div class="line">                while (requestAmount != currentEmission) &#123;</div><div class="line">                    boolean done = finished;</div><div class="line">                    Object v = q.poll();</div><div class="line">                    boolean empty = v == null;</div><div class="line">                    </div><div class="line">                    if (checkTerminated(done, empty, localChild, q)) &#123;</div><div class="line">                        return;</div><div class="line">                    &#125;</div><div class="line">                    </div><div class="line">                    if (empty) &#123;</div><div class="line">                        break;</div><div class="line">                    &#125;</div><div class="line">                    </div><div class="line">                    localChild.onNext(localOn.getValue(v));</div><div class="line"></div><div class="line">                    currentEmission++;</div><div class="line">                    emitted++;</div><div class="line">                &#125;</div><div class="line">                </div><div class="line">                if (requestAmount == currentEmission) &#123;</div><div class="line">                    if (checkTerminated(finished, q.isEmpty(), localChild, q)) &#123;</div><div class="line">                        return;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">                </div><div class="line">                if (currentEmission != 0L) &#123;</div><div class="line">                    BackpressureUtils.produced(requested, currentEmission);</div><div class="line">                &#125;</div><div class="line">                </div><div class="line">                missed = counter.addAndGet(-missed);</div><div class="line">                if (missed == 0L) &#123;</div><div class="line">                    break;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            </div><div class="line">            if (emitted != 0L) &#123;</div><div class="line">                request(emitted);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        boolean checkTerminated(boolean done, boolean isEmpty, Subscriber&lt;? super T&gt; a, Queue&lt;Object&gt; q) &#123;</div><div class="line">            if (a.isUnsubscribed()) &#123;</div><div class="line">                q.clear();</div><div class="line">                return true;</div><div class="line">            &#125;</div><div class="line">            </div><div class="line">            if (done) &#123;</div><div class="line">                if (delayError) &#123;</div><div class="line">                    if (isEmpty) &#123;</div><div class="line">                        Throwable e = error;</div><div class="line">                        try &#123;</div><div class="line">                            if (e != null) &#123;</div><div class="line">                                a.onError(e);</div><div class="line">                            &#125; else &#123;</div><div class="line">                                a.onCompleted();</div><div class="line">                            &#125;</div><div class="line">                        &#125; finally &#123;</div><div class="line">                            recursiveScheduler.unsubscribe();</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                &#125; else &#123;</div><div class="line">                    Throwable e = error;</div><div class="line">                    if (e != null) &#123;</div><div class="line">                        q.clear();</div><div class="line">                        try &#123;</div><div class="line">                            a.onError(e);</div><div class="line">                        &#125; finally &#123;</div><div class="line">                            recursiveScheduler.unsubscribe();</div><div class="line">                        &#125;</div><div class="line">                        return true;</div><div class="line">                    &#125; else</div><div class="line">                    if (isEmpty) &#123;</div><div class="line">                        try &#123;</div><div class="line">                            a.onCompleted();</div><div class="line">                        &#125; finally &#123;</div><div class="line">                            recursiveScheduler.unsubscribe();</div><div class="line">                        &#125;</div><div class="line">                        return true;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">                    </div><div class="line">            &#125;</div><div class="line">            </div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里的代码有点长，我们先注意到它是一个<code>Operator</code>，它没有对上层<code>Observable</code>做任何的控制或者包装。</p>
+<p>既然是<code>Operator</code>，那么它的职责就是把一个<code>Subscriber</code>转换成另外一个<code>Subscriber</code>， 我们来关注下转换后的<code>Subscriber</code>对转换前的<code>Subscriber</code>做了些什么事。</p>
+<p>首先它是一个<code>ObserveOnSubscriber</code>类， 既然是<code>Subscriber</code>那么肯定有<code>onNext</code>, <code>onComplete</code> 和<code>onError</code> 看最主要的onNext</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public void onNext(final T t) &#123;</div><div class="line">    if (isUnsubscribed() || finished) &#123;</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    if (!queue.offer(on.next(t))) &#123;</div><div class="line">        onError(new MissingBackpressureException());</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">    schedule();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>好了，这里做了两件事，首先把结果缓存到一个队列里，然后调用<code>schedule</code>启动传入的<code>worker</code></p>
+<p>我们这里需要注意下：</p>
+<blockquote>
+<p>在调用<code>observeOn</code>前的序列，把结果传入到<code>onNext</code>就是它的工作，它并不关心后续的流程，所以工作就到这里就结束了，剩下的交给<code>ObserveOnSubscriber</code>继续。</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">protected void schedule() &#123;</div><div class="line">    if (counter.getAndIncrement() == 0) &#123;</div><div class="line">        recursiveScheduler.schedule(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>recursiveScheduler</code> 就是之前我们传入的Scheduler，我们一般会在<code>observeOn</code>传入<code>AndroidScheluders.mainThread()</code>对吧、</p>
+<p>接下去，我们看下在<code>scheduler</code>中调用的<code>call</code>方法，这里只列出主要带代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public void call() &#123;</div><div class="line">    ...</div><div class="line">    final Subscriber&lt;? super T&gt; localChild = this.child;</div><div class="line">    for (;;) &#123;</div><div class="line">        ...</div><div class="line">        boolean done = finished;</div><div class="line">        Object v = q.poll();</div><div class="line">        boolean empty = v == null;</div><div class="line">        </div><div class="line">        if (checkTerminated(done, empty, localChild, q)) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        if (empty) &#123;</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        localChild.onNext(localOn.getValue(v));</div><div class="line"></div><div class="line">        ...</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    if (emitted != 0L) &#123;</div><div class="line">        request(emitted);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>OK，在<code>Scheduler</code>启动后， 我们在<code>Observable.subscribe(a)</code>传入的<code>a</code>就是这里的<code>child</code>， <strong>我们看到，在<code>call</code>中终于调用了它的<code>onNext</code>方法，把真正的结果传了出去，但是在这里，我们是工作在<code>observeOn</code>的线程上的。</strong></p>
+<p>那么总结起来的结论就是：</p>
+<blockquote>
+<ol>
+<li><code>observeOn</code> 对调用之前的序列默不关心，也不会要求之前的序列运行在指定的线程上</li>
+<li><code>observeOn</code> 对之前的序列产生的结果先缓存起来，然后再在指定的线程上，推送给最终的<code>subscriber</code></li>
+</ol>
+</blockquote>
+<h2 id="复杂情况"><a href="#复杂情况" class="headerlink" title="复杂情况"></a>复杂情况</h2><p>我们经常多次使用<code>subscribeOn</code>切换线程，那么以后是否可以组合<code>observeOn</code>和<code>subscribeOn</code>达到自由切换的目的呢？</p>
+<p>组合是可以的，但是他们的执行顺序是有条件的，如果仔细分析的话，可以知道<code>observeOn</code>调用之后，再调用<code>subscribeOn</code>是无效的，原因是什么？</p>
+<p>因为<code>subscribeOn</code>改变的是<code>subscribe</code>这句调用所在的线程，大多数情况，产生内容和消费内容是在同一线程的，所以改变了产生内容所在的线程，就改变了消费内容所在的线程。</p>
+<p>经过上面的阐述，我们知道，<code>observeOn</code>的工作原理是把消费结果先缓存，再切换到新线程上让原始消费者消费，它和生产者是没有一点关系的，就算<code>subscribeOn</code>调用了，也只是改变<code>observeOn</code>这个消费者所在的线程，和<code>OperatorObserveOn</code>中存储的原始消费者一点关系都没有，它还是由<code>observeOn</code>控制。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>如果我们有一段这样的序列</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Observable</div><div class="line">.map                    // 操作1</div><div class="line">.flatMap                // 操作2</div><div class="line">.subscribeOn(io)</div><div class="line">.map                    //操作3</div><div class="line">.flatMap                //操作4</div><div class="line">.observeOn(main)</div><div class="line">.map                    //操作5</div><div class="line">.flatMap                //操作6</div><div class="line">.subscribeOn(io)        //!!特别注意</div><div class="line">.subscribe(handleData)</div></pre></td></tr></table></figure>
+<p>假设这里我们是在主线程上调用这段代码，<br>那么  </p>
+<blockquote>
+<ol>
+<li><code>操作1</code>，<code>操作2</code>是在io线程上，因为之后<code>subscribeOn</code>切换了线程</li>
+<li><code>操作3</code>，<code>操作4</code>也是在io线程上，因为在<code>subscribeOn</code>切换了线程之后，并没有发生改变。</li>
+<li><code>操作5</code>，<code>操作6</code>是在main线程上，因为在他们之前的<code>observeOn</code>切换了线程。</li>
+<li>特别注意那一段，对于<code>操作5</code>和<code>操作6</code>是无效的<br>再简单点总结就是</li>
+<li><code>subscribeOn</code>的调用切换之前的线程。</li>
+<li><code>observeOn</code>的调用切换之后的线程。</li>
+<li><code>observeOn</code>之后，不可再调用<code>subscribeOn</code> 切换线程</li>
+</ol>
+</blockquote>
+<p>=========<br>续 特别感谢<a href="http://weibo.com/rengwuxian?is_all=1" target="_blank" rel="external">@扔物线</a>给的额外的总结</p>
+<blockquote>
+<ol>
+<li>下面提到的“操作”包括产生事件、用操作符操作事件以及最终的通过 subscriber 消费事件</li>
+<li>只有第一subscribeOn() 起作用（所以多个 subscribeOn() 毛意义）</li>
+<li>这个 subscribeOn() 控制从流程开始的第一个操作，直到遇到第一个 observeOn()</li>
+<li>observeOn() 可以使用多次，每个 observeOn() 将导致一次线程切换()，这次切换开始于这次 observeOn() 的下一个操作</li>
+<li>不论是 subscribeOn() 还是 observeOn()，每次线程切换如果不受到下一个 observeOn() 的干预，线程将不再改变，不会自动切换到其他线程</li>
+</ol>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-mi-zhi-rxjava-6';
+          this.page.title = '谜之RxJava （三）update 2 —— subscribeOn 和 observeOn 的区别';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2016/04/28/coordinator-android-2/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2016/04/03/mi-zhi-rxjava-5/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2016/04/03/mi-zhi-rxjava-6/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

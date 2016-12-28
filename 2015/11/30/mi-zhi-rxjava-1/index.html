@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="谜之RxJava （一） —— 最基本的观察者模式"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>谜之RxJava （一） —— 最基本的观察者模式 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            谜之RxJava （一） —— 最基本的观察者模式
+            
+          </h1>
+          <p class="posted-on">
+          2015-11-30
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>最近在<code>Android</code>界，最火的framework大概就是<code>RxJava</code>了。<br>扔物线大大之前写了一篇文章 <a href="http://gank.io/post/560e15be2dca930e00da1083" target="_blank" rel="external">《给 Android 开发者的 RxJava 详解》</a>，在我学习RxJava的过程中受益匪浅。经过阅读这篇文章后，我们来看下<code>RxJava</code>的源码，揭开它神秘的面纱。<br><a id="more"></a></p>
+<p>这里准备分几篇文章写，为了能让自己有个喘口气的机会。</p>
+<p>先来上个最最简单的，经典的Demo。</p>
+<h2 id="Demo"><a href="#Demo" class="headerlink" title="Demo"></a>Demo</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">Observable.create(<span class="keyword">new</span> Observable.OnSubscribe&lt;String&gt;() &#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> String&gt; subscriber)</span> </span>&#123;</div><div class="line">        subscriber.onNext(<span class="string">"hello"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;).subscribe(<span class="keyword">new</span> Subscriber&lt;String&gt;() &#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCompleted</span><span class="params">()</span> </span>&#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">(Throwable e)</span> </span>&#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(String s)</span> </span>&#123;</div><div class="line">        Log.d(<span class="string">"rx"</span>, s);</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>这段代码产生的最终结果就是在Log里会出现hello。</p>
+<p>看下这段代码的具体流程吧。<br>这里有2个函数<code>create</code>和<code>subscribe</code>，我们看看<code>create</code>里面干了啥。</p>
+<h2 id="OnSubscribe对象"><a href="#OnSubscribe对象" class="headerlink" title="OnSubscribe对象"></a>OnSubscribe对象</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Observable&lt;T&gt; <span class="title">create</span><span class="params">(OnSubscribe&lt;T&gt; f)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Observable&lt;T&gt;(hook.onCreate(f));</div><div class="line">&#125;</div><div class="line"><span class="comment">// constructor</span></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="title">Observable</span><span class="params">(OnSubscribe&lt;T&gt; f)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>.onSubscribe = f;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里的<code>hook</code>是一个默认实现，里面不做任何事，就是返回<code>f</code>。我们看见<code>create</code>只是给<code>Observable</code>的<code>onSubscribe</code>赋值了我们定义的<code>OnSubscribe</code>。</p>
+<h2 id="Subscriber对象"><a href="#Subscriber对象" class="headerlink" title="Subscriber对象"></a>Subscriber对象</h2><p>来看下<code>subscribe</code>这个函数做了什么事<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Subscription <span class="title">subscribe</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> T&gt; subscriber)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> Observable.subscribe(subscriber, <span class="keyword">this</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Subscription <span class="title">subscribe</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> T&gt; subscriber, Observable&lt;T&gt; observable)</span> </span>&#123;</div><div class="line"> <span class="comment">// validate and proceed</span></div><div class="line">    <span class="keyword">if</span> (subscriber == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"observer can not be null"</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (observable.onSubscribe == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"onSubscribe function can not be null."</span>);</div><div class="line">        <span class="comment">/*</span></div><div class="line">         * the subscribe function can also be overridden but generally that's not the appropriate approach</div><div class="line">         * so I won't mention that in the exception</div><div class="line">         */</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="comment">// new Subscriber so onStart it</span></div><div class="line">    subscriber.onStart();</div><div class="line">    </div><div class="line">    <span class="comment">/*</span></div><div class="line">     * See https://github.com/ReactiveX/RxJava/issues/216 for discussion on "Guideline 6.4: Protect calls</div><div class="line">     * to user code from within an Observer"</div><div class="line">     */</div><div class="line">    <span class="comment">// if not already wrapped</span></div><div class="line">    <span class="keyword">if</span> (!(subscriber <span class="keyword">instanceof</span> SafeSubscriber)) &#123;</div><div class="line">        <span class="comment">// assign to `observer` so we return the protected version</span></div><div class="line">        subscriber = <span class="keyword">new</span> SafeSubscriber&lt;T&gt;(subscriber);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// The code below is exactly the same an unsafeSubscribe but not used because it would add a sigificent depth to alreay huge call stacks.</span></div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">// allow the hook to intercept and/or decorate</span></div><div class="line">        hook.onSubscribeStart(observable, observable.onSubscribe).call(subscriber);</div><div class="line">        <span class="keyword">return</span> hook.onSubscribeReturn(subscriber);</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">        <span class="comment">// special handling for certain Throwable/Error/Exception types</span></div><div class="line">        Exceptions.throwIfFatal(e);</div><div class="line">        <span class="comment">// if an unhandled error occurs executing the onSubscribe we will propagate it</span></div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            subscriber.onError(hook.onSubscribeError(e));</div><div class="line">        &#125; <span class="keyword">catch</span> (OnErrorNotImplementedException e2) &#123;</div><div class="line">            <span class="comment">// special handling when onError is not implemented ... we just rethrow</span></div><div class="line">            <span class="keyword">throw</span> e2;</div><div class="line">        &#125; <span class="keyword">catch</span> (Throwable e2) &#123;</div><div class="line">            <span class="comment">// if this happens it means the onError itself failed (perhaps an invalid function implementation)</span></div><div class="line">            <span class="comment">// so we are unable to propagate the error correctly and will just throw</span></div><div class="line">            RuntimeException r = <span class="keyword">new</span> RuntimeException(<span class="string">"Error occurred attempting to subscribe ["</span> + e.getMessage() + <span class="string">"] and then again while trying to pass to onError."</span>, e2);</div><div class="line">            <span class="comment">// TODO could the hook be the cause of the error in the on error handling.</span></div><div class="line">            hook.onSubscribeError(r);</div><div class="line">            <span class="comment">// TODO why aren't we throwing the hook's return value.</span></div><div class="line">            <span class="keyword">throw</span> r;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> Subscriptions.unsubscribed();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>我们看到，这里我们的<code>subscriber</code>被<code>SafeSubscriber</code>包裹了一层。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (!(subscriber <span class="keyword">instanceof</span> SafeSubscriber)) &#123;</div><div class="line">    <span class="comment">// assign to `observer` so we return the protected version</span></div><div class="line">    subscriber = <span class="keyword">new</span> SafeSubscriber&lt;T&gt;(subscriber);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后开始执行工作流<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">hook.onSubscribeStart(observable, observable.onSubscribe).call(subscriber);</div><div class="line"><span class="keyword">return</span> hook.onSubscribeReturn(subscriber);</div></pre></td></tr></table></figure></p>
+<p>默认的<code>hook</code>只是返回我们之前定义的<code>onSubscribe</code>，这里调用的<code>call</code>方法就是我们在外面定义的<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">new</span> Observable.OnSubscribe&lt;String&gt;() &#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">call</span><span class="params">(Subscriber&lt;? <span class="keyword">super</span> String&gt; subscriber)</span> </span>&#123;</div><div class="line">        subscriber.onNext(<span class="string">"hello"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;)</div></pre></td></tr></table></figure></p>
+<p>我们调用传入的<code>subscriber</code>对象的<code>onNext</code>方法，这里的<code>subscriber</code>是<code>SafeSubscriber</code><br>在<code>SafeScriber</code>中<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onNext</span><span class="params">(T args)</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">if</span> (!done) &#123;</div><div class="line">            actual.onNext(args);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">        <span class="comment">// we handle here instead of another method so we don't add stacks to the frame</span></div><div class="line">        <span class="comment">// which can prevent it from being able to handle StackOverflow</span></div><div class="line">        Exceptions.throwIfFatal(e);</div><div class="line">        <span class="comment">// handle errors if the onNext implementation fails, not just if the Observable fails</span></div><div class="line">        onError(e);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><code>actual</code>就是我们自己定义的<code>subscriber</code>。 原来<code>SafeSubscriber</code>只是为了帮我们处理好异常，以及防止工作流的重复。</p>
+<p>这是<code>RxJava</code>最最基本的工作流，让我们认识到他是怎么工作的。之后我们来讲讲其中的细节和其他神奇的内容。</p>
+<p><a href="http://segmentfault.com/a/1190000004049841" target="_blank" rel="external">【谜之RxJava （二） —— Magic Lift】</a></p>
+<blockquote>
+<p>欢迎关注我<a href="https://github.com/geminiwen" target="_blank" rel="external">Github</a> 以及 <a href="http://weibo.com/coffeesherk/home?leftnav=1" target="_blank" rel="external">weibo</a>、<a href="/u/gemini">@Gemini</a></p>
+</blockquote>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-mi-zhi-rxjava-1';
+          this.page.title = '谜之RxJava （一） —— 最基本的观察者模式';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2015/12/01/mi-zhi-rxjava-4/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/11/26/mi-zhi-rxjava-3/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2015/11/30/mi-zhi-rxjava-1/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>

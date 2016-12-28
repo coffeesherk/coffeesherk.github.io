@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<!-- Head tag -->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!--Description-->
+  
+  <meta name="description" content="Gemini 的训练场">
+  
+
+  <!--Author-->
+  
+  <meta name="author" content="Gemini Wen">
+  
+
+  <!--Open Graph Title-->
+  
+      <meta property="og:title" content="Android 程序员学习 iOS  ——故事从这里开始"/>
+  
+  <!--Open Graph Description-->
+  
+      <meta property="og:description" content="Gemini 的训练场" />
+  
+  <!--Open Graph Site Name-->
+  <meta property="og:site_name" content="Gemini&#39;s Blog"/>
+  <!--Type page-->
+  
+      <meta property="og:type" content="article" />
+  
+  <!--Page Cover-->
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Title -->
+  
+  <title>Android 程序员学习 iOS  ——故事从这里开始 - Gemini&#39;s Blog</title>
+
+
+  <link rel="shortcut icon" href="/img/ic_android.png">
+
+  <!-- Custom CSS/Sass -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!----------------------------
+  https://github.com/GallenHu/hexo-theme-Daily
+
+ _____            _   _
+|  __ \          (_) | |
+| |  | |   __ _   _  | |  _   _
+| |  | |  / _` | | | | | | | | |
+| |__| | | (_| | | | | | | |_| |
+|_____/   \__,_| |_| |_|  \__, |
+                          __/ |
+                         |___/
+
+    --------------------------->
+
+</head>
+
+
+<body>
+
+  <!-- Nav -->
+  <header class="site-header">
+  <div class="header-inside">
+    <div class="logo">
+      <a href="/" rel="home">
+        
+        <img src="/img/ic_android.png" alt="Gemini's Blog" height="60">
+        
+      </a>
+    </div>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse">
+        <ul class="navbar-nav">
+          
+          
+            <li>
+              <a href="/.">
+                
+                  home
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/archives">
+                
+                  archive
+                
+              </a>
+            </li>
+          
+            <li>
+              <a href="/about">
+                
+                  about
+                
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </nav>
+    <div class="button-wrap">
+      <button class="menu-toggle">Primary Menu</button>
+    </div>
+  </div>
+</header>
+
+
+  <!-- Main Content -->
+  <div class="content-area">
+  <div class="post">
+    <!-- Post Content -->
+    <div class="container">
+      <article>
+        <!-- Title date & tags -->
+        <div class="post-header">
+          <h1 class="entry-title">
+            Android 程序员学习 iOS  ——故事从这里开始
+            
+          </h1>
+          <p class="posted-on">
+          2016-01-07
+          </p>
+          <div class="tags-links">
+            
+              
+                <a href="/tags/android/" rel="tag">
+                  android
+                </a>
+              
+                <a href="/tags/ios/" rel="tag">
+                  ios
+                </a>
+              
+            
+          </div>
+        </div>
+        <!-- Post Main Content -->
+        <div class="entry-content">
+          <p>最近因为公司的一些原因，需要涉及iOS开发。在坑里摸爬滚打了2周之后，就写个入门心得吧。<br>在一切的一切开始之前，你要先会<code>Objective-C</code>或者<code>Swift</code>（喜欢哪个用哪个，你开心就好）。<br><a id="more"></a></p>
+<p>然后，要准备一台<code>OS X</code>的电脑，并安装好<code>Xcode</code>，然后一切就可以开始了。</p>
+<p>打开<code>Xcode</code>，然后新建一个项目，看到的界面是这样的（其实和<code>Android Studio</code>的模式很相似啦）</p>
+<p><img src="https://segmentfault.com/img/bVr4z0" alt="clipboard.png"><br>看看几个项目，你大概也理解了分别要创建怎么样的应用，它提供一个模板，然后可以快速创建出某种结构的程序。大部分情况的应用是属于<code>Tabbed Application</code>，也就是带<code>Tab</code>的程序。</p>
+<h2 id="文件概念迁移"><a href="#文件概念迁移" class="headerlink" title="文件概念迁移"></a>文件概念迁移</h2><p>创建好一个应用后，我们能看到<code>AppDelegate</code>，<code>storyboard</code>，<code>plist</code>之类的文件。这些分别是啥呢？</p>
+<p><em>我来个简单干脆的映射，方便理解，但是不精准，如有错误，感谢指出</em></p>
+<table>
+<thead>
+<tr>
+<th>iOS</th>
+<th>Android</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Info.plist</code></td>
+<td><code>AndroidManifest.xml</code></td>
+<td>记录应用程序的一些元数据</td>
+</tr>
+<tr>
+<td><code>AppDelegate</code></td>
+<td><code>Application</code></td>
+<td>管理整个<code>Application</code>的生命周期</td>
+</tr>
+<tr>
+<td><code>ViewController</code></td>
+<td><code>Activity</code></td>
+<td>负责管理<code>View</code>，管理整个应用程序的交互</td>
+</tr>
+<tr>
+<td>各类<code>storyboard</code>文件</td>
+<td>各类<code>xml</code>文件</td>
+<td>定义一些布局，一些iOS程序员习惯在代码里写布局，可能用不到<code>storyboard</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>Android</code>程序始于<code>Application</code>的<code>onCreate</code>方法，<code>iOS</code>始于<code>AppDelegate</code>的<code>application didFinishLaunchingWithOptions</code>方法，这里唯一不同的是<code>Android</code>的<code>launch activity</code>只能使用<code>AndroidManifest.xml</code>指定，但是<code>iOS</code>可以使用代码去指定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">self.window.rootViewController = xxxx;</div></pre></td></tr></table></figure>
+<h2 id="从Activity到UIViewController"><a href="#从Activity到UIViewController" class="headerlink" title="从Activity到UIViewController"></a>从Activity到UIViewController</h2><p><code>Android</code>中的<code>Activity</code>和<code>View</code>并没有强制关联，但是<code>iOS</code>中的<code>UIViewController</code>默认都带一个<code>View</code>，你可以把这个认为是<code>Activity</code>中<code>Window</code>的<code>decorView</code>，是所有<code>View</code>的父容器。当你生成好一个<code>UIViewController</code>之后，你往它的成员变量<code>view</code>中添加你的视图即可，如果你是从<code>storyboard</code>中生成的<code>UIViewController</code>，那你构建的<code>View</code>就会自动添加进来。</p>
+<p><code>Android</code>一切初始化的地方，我们习惯在<code>onCreate</code>中使用<code>setContentView</code>之后，然后用<code>findViewById</code>获取到控件的实例，为控件绑定一些监听器，而<code>iOS</code>中，我们开始的地方，大部分是<code>UIViewController</code>的<code>viewDidLoad</code>方法，我们使用代码生成我们要的控件，同时为控件绑定事件，或者使用<code>storyboard</code>的<code>Outlet</code>系统绑定到我们的类成员变量上，并生成事件监听。</p>
+<p>所有故事，都是从这里开始对吧？</p>
+<p>接下去要做的事就是根据用户和控件的交互，在视图上做出相应的反馈即可。</p>
+<h2 id="界面之间的跳转"><a href="#界面之间的跳转" class="headerlink" title="界面之间的跳转"></a>界面之间的跳转</h2><p><code>Android</code>的跳转使用<code>Intent</code>从一个<code>Activity</code>跳转到另外一个<code>Activity</code>。<br>而<code>iOS</code>中，我们在跳转之前，要做的事情就是生成我们的目标<code>UIViewController</code>，然后使用我们想要的方式跳转。 <code>iOS</code>为我们提供了几种模式跳转，最常见的有2种，使用<code>navigationController</code>和<code>pushModal</code>，大部分的<code>iOS</code>程序，顶部都有一个导航条，它由一个更高级抽象的<code>NavigationController</code>进行控制，就和<code>Android</code>中的<code>Task</code>概念类似，我们每次<code>pushViewController</code>，就会在它的栈中压入一个<code>ViewController</code>。而<code>pushModal</code>看名字就知道，是弹出一个模态框，它的返回操作一般只有关闭一个按钮，具体使用哪种方式，需要和产品的概念相呼应才行。</p>
+<p>UI的相关介绍就到这，接下去有时间，我们谈谈<code>Android</code>中的<code>Handler</code>在<code>iOS</code>中以什么样的方式存在</p>
+
+        </div>
+      </article>
+    </div>
+    <!-- Comments -->
+    <div class="container">
+      
+<section id="comment">
+  <!-- <h1 class="title">Comments</h1> -->
+
+  
+  <div id="disqus_thread">
+    <script type="text/javascript">
+    var disqus_config = function () {
+          this.page.url = window.location.href;
+          this.page.identifier = 'post-android-programmer-learn-ios-1';
+          this.page.title = 'Android 程序员学习 iOS  ——故事从这里开始';
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+  
+</section>
+
+
+    </div>
+    <!-- Pre or Next -->
+    <div class="nav-links">
+      
+        <div class="nav-previous">
+          <a href="/2016/01/07/android-programmer-learn-ios-2/" rel="prev"><span class="meta-arraw meta-arraw-left"></span> Older Posts</a>
+        </div>
+      
+      
+        <div class="nav-next">
+          <a href="/2015/12/01/mi-zhi-rxjava-4/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
+        </div>
+      
+    </div>
+
+  </div>
+</div>
+
+
+  <!-- Footer -->
+  <!-- Footer-widgets -->
+<div class="footer-widgets">
+  <div class="row inside-wrapper">
+    <div class="col-1-3">
+       <aside>
+    <h1 class="widget-title">links</h1>
+    <div class="links">
+      
+		 	<a target="_blank" href="https://anchorer.github.io/">土豆</a>
+  		 
+		 	<a target="_blank" href="http://hellovass.info">首领</a>
+  		 
+		 	<a target="_blank" href="http://hpcloud.top/">黄浦</a>
+  		 
+		 	<a target="_blank" href="http://zhulinfeng.xyz/">LF</a>
+  		 
+    </div>
+</aside>	
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Contact</h1>
+        <div class="widget-text">
+          
+            
+              <a href="https://github.com/geminiwen" class="icon icon-github" target="_blank">github</a>
+            
+              <a href="http://weibo.com/coffeesherk" class="icon icon-weibo" target="_blank">weibo</a>
+            
+              <a href="mailto:coffeesherk@gmail.com" class="icon icon-mail" target="_blank">mail</a>
+            
+              <a href="https://twitter.com/geminiwen1992" class="icon icon-twitter" target="_blank">twitter</a>
+            
+          
+        </div>
+      </aside>
+    </div>
+    <div class="col-1-3">
+      <aside>
+        <h1 class="widget-title">Search</h1>
+        <div class="widget-text">
+          <form onSubmit="return appDaily.submitSearch('')">
+            <p>
+              <input type="text" placeholder="search..." id="homeSearchInput">
+            </p>
+            <!-- <input type="submit" value="GO"> -->
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+<!-- Footer -->
+<footer class="site-info">
+  <p>
+    <span>Gemini's Blog &copy; 2016</span>
+    
+      <span class="split">|</span><span>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a> with Theme <a href="https://github.com/GallenHu/hexo-theme-Daily" target="_blank">Daily</a></span>
+    
+  </p>
+</footer>
+
+
+  <!-- After footer scripts -->
+  <!-- scripts -->
+<script src="//cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="/js/app.js"></script>
+<script type="text/javascript">
+
+  var disqus_shortname = 'gemini-blog';
+
+  
+  var disqus_url = 'https://geminiwen.xyz/2016/01/07/android-programmer-learn-ios-1/';
+  
+
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-89499441-1', 'auto');
+  ga('send', 'pageview');
+
+
+</script>
+
+</body>
+
+</html>
