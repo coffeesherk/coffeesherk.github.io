@@ -191,59 +191,7 @@
 <h2 id="偷梁换柱"><a href="#偷梁换柱" class="headerlink" title="偷梁换柱"></a>偷梁换柱</h2><p>具体函数在<code>aspect_swizzleForwardInvocation</code>中实现</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="built_in">NSString</span> *<span class="keyword">const</span> AspectsForwardInvocationSelectorName = <span class="string">@"__aspects_forwardInvocation:"</span>;</div><div class="line"><span class="keyword">static</span> <span class="keyword">void</span> aspect_swizzleForwardInvocation(Class klass) &#123;</div><div class="line">    <span class="built_in">NSCParameterAssert</span>(klass);</div><div class="line">    <span class="comment">// If there is no method, replace will act like class_addMethod.</span></div><div class="line">    IMP originalImplementation = class_replaceMethod(klass, <span class="keyword">@selector</span>(forwardInvocation:), (IMP)__ASPECTS_ARE_BEING_CALLED__, <span class="string">"v@:@"</span>);</div><div class="line">    <span class="keyword">if</span> (originalImplementation) &#123;</div><div class="line">        class_addMethod(klass, <span class="built_in">NSSelectorFromString</span>(AspectsForwardInvocationSelectorName), originalImplementation, <span class="string">"v@:@"</span>);</div><div class="line">    &#125;</div><div class="line">    AspectLog(<span class="string">@"Aspects: %@ is now aspect aware."</span>, <span class="built_in">NSStringFromClass</span>(klass));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>我们看到，<code>Aspects</code>把<code>forwardInvocation</code>的实现换成了<code>__ASPECTS_ARE_BEING_CALLED__</code>这个函数，而原始的<code>forwardInvocation</code>实现的名字就变成了<code>__aspects_forwardInvocation</code><br>看看<code>__ASPECTS_ARE_BEING_CALLED__</code>这里干了什么</p>
-<p>// This is the swizzled forwardInvocation: method.<br>static void <strong>ASPECTS_ARE_BEING_CALLED</strong>(__unsafe_unretained NSObject <em>self, SEL selector, NSInvocation </em>invocation) {<br>    NSCParameterAssert(self);<br>    NSCParameterAssert(invocation);</p>
-<pre><code>// 得到原始 selector
-SEL originalSelector = invocation.selector;
-// 得到原始 selector 的别名（之前被我们添加到类里了），这才是真正的实现
-SEL aliasSelector = aspect_aliasForSelector(invocation.selector);
-// 替换 selector
-invocation.selector = aliasSelector;
-AspectsContainer *objectContainer = objc_getAssociatedObject(self, aliasSelector);
-AspectsContainer *classContainer = aspect_getContainerForClass(object_getClass(self), aliasSelector);
-AspectInfo *info = [[AspectInfo alloc] initWithInstance:self invocation:invocation];
-NSArray *aspectsToRemove = nil;
-
-// Before hooks.
-aspect_invoke(classContainer.beforeAspects, info);
-aspect_invoke(objectContainer.beforeAspects, info);
-
-// Instead hooks.
-BOOL respondsToAlias = YES;
-if (objectContainer.insteadAspects.count || classContainer.insteadAspects.count) {
-    aspect_invoke(classContainer.insteadAspects, info);
-    aspect_invoke(objectContainer.insteadAspects, info);
-}else {
-    Class klass = object_getClass(invocation.target);
-    do {
-        if ((respondsToAlias = [klass instancesRespondToSelector:aliasSelector])) {
-            [invocation invoke];
-            break;
-        }
-    }while (!respondsToAlias &amp;&amp; (klass = class_getSuperclass(klass)));
-}
-
-// After hooks.
-aspect_invoke(classContainer.afterAspects, info);
-aspect_invoke(objectContainer.afterAspects, info);
-
-// 以上就是执行 hook 的具体内容了
-
-// If no hooks are installed, call original implementation (usually to throw an exception)
-if (!respondsToAlias) {
-    // 如果没有执行的话。。那么只好执行默认的 forwardInvocation 了
-    invocation.selector = originalSelector;
-    SEL originalForwardInvocationSEL = NSSelectorFromString(AspectsForwardInvocationSelectorName);
-    if ([self respondsToSelector:originalForwardInvocationSEL]) {
-        ((void( *)(id, SEL, NSInvocation *))objc_msgSend)(self, originalForwardInvocationSEL, invocation);
-    }else {
-        [self doesNotRecognizeSelector:invocation.selector];
-    }
-}
-
-// 做一些额外的清理
-// Remove any hooks that are queued for deregistration.
-[aspectsToRemove makeObjectsPerformSelector:@selector(remove)];
-</code></pre><p>}</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// This is the swizzled forwardInvocation: method.</span></div><div class="line"><span class="keyword">static</span> <span class="keyword">void</span> __ASPECTS_ARE_BEING_CALLED__(__<span class="keyword">unsafe_unretained</span> <span class="built_in">NSObject</span> *<span class="keyword">self</span>, SEL selector, <span class="built_in">NSInvocation</span> *invocation) &#123;</div><div class="line">    <span class="built_in">NSCParameterAssert</span>(<span class="keyword">self</span>);</div><div class="line">    <span class="built_in">NSCParameterAssert</span>(invocation);</div><div class="line"></div><div class="line">    <span class="comment">// 得到原始 selector</span></div><div class="line">    SEL originalSelector = invocation.selector;</div><div class="line">    <span class="comment">// 得到原始 selector 的别名（之前被我们添加到类里了），这才是真正的实现</span></div><div class="line">    SEL aliasSelector = aspect_aliasForSelector(invocation.selector);</div><div class="line">    <span class="comment">// 替换 selector</span></div><div class="line">    invocation.selector = aliasSelector;</div><div class="line">    AspectsContainer *objectContainer = objc_getAssociatedObject(<span class="keyword">self</span>, aliasSelector);</div><div class="line">    AspectsContainer *classContainer = aspect_getContainerForClass(object_getClass(<span class="keyword">self</span>), aliasSelector);</div><div class="line">    AspectInfo *info = [[AspectInfo alloc] initWithInstance:<span class="keyword">self</span> invocation:invocation];</div><div class="line">    <span class="built_in">NSArray</span> *aspectsToRemove = <span class="literal">nil</span>;</div><div class="line"></div><div class="line">    <span class="comment">// Before hooks.</span></div><div class="line">    aspect_invoke(classContainer.beforeAspects, info);</div><div class="line">    aspect_invoke(objectContainer.beforeAspects, info);</div><div class="line"></div><div class="line">    <span class="comment">// Instead hooks.</span></div><div class="line">    <span class="built_in">BOOL</span> respondsToAlias = <span class="literal">YES</span>;</div><div class="line">    <span class="keyword">if</span> (objectContainer.insteadAspects.count || classContainer.insteadAspects.count) &#123;</div><div class="line">        aspect_invoke(classContainer.insteadAspects, info);</div><div class="line">        aspect_invoke(objectContainer.insteadAspects, info);</div><div class="line">    &#125;<span class="keyword">else</span> &#123;</div><div class="line">        Class klass = object_getClass(invocation.target);</div><div class="line">        <span class="keyword">do</span> &#123;</div><div class="line">            <span class="keyword">if</span> ((respondsToAlias = [klass instancesRespondToSelector:aliasSelector])) &#123;</div><div class="line">                [invocation invoke];</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;<span class="keyword">while</span> (!respondsToAlias &amp;&amp; (klass = class_getSuperclass(klass)));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// After hooks.</span></div><div class="line">    aspect_invoke(classContainer.afterAspects, info);</div><div class="line">    aspect_invoke(objectContainer.afterAspects, info);</div><div class="line"></div><div class="line">    <span class="comment">// 以上就是执行 hook 的具体内容了</span></div><div class="line"></div><div class="line">    <span class="comment">// If no hooks are installed, call original implementation (usually to throw an exception)</span></div><div class="line">    <span class="keyword">if</span> (!respondsToAlias) &#123;</div><div class="line">        <span class="comment">// 如果没有执行的话。。那么只好执行默认的 forwardInvocation 了</span></div><div class="line">        invocation.selector = originalSelector;</div><div class="line">        SEL originalForwardInvocationSEL = <span class="built_in">NSSelectorFromString</span>(AspectsForwardInvocationSelectorName);</div><div class="line">        <span class="keyword">if</span> ([<span class="keyword">self</span> respondsToSelector:originalForwardInvocationSEL]) &#123;</div><div class="line">            ((<span class="keyword">void</span>( *)(<span class="keyword">id</span>, SEL, <span class="built_in">NSInvocation</span> *))objc_msgSend)(<span class="keyword">self</span>, originalForwardInvocationSEL, invocation);</div><div class="line">        &#125;<span class="keyword">else</span> &#123;</div><div class="line">            [<span class="keyword">self</span> doesNotRecognizeSelector:invocation.selector];</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 做一些额外的清理</span></div><div class="line">    <span class="comment">// Remove any hooks that are queued for deregistration.</span></div><div class="line">    [aspectsToRemove makeObjectsPerformSelector:<span class="keyword">@selector</span>(remove)];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>以上就是<code>Aspects</code> hook objc 进行 AOP 全过程，虽然只有短短一千行不到的代码，却提供了很方便的方式进行 AOP，实现也很巧妙。<br>看完后对 objc runtime 羡慕不已，实在强大！</p>
 
         </div>
@@ -253,7 +201,7 @@ if (!respondsToAlias) {
     <div class="container">
       
 <section id="comment">
-  <!-- <h1 class="title">留言</h1> -->
+  <!-- <h1 class="title">Comments</h1> -->
 
   
   <div id="disqus_thread">
@@ -276,7 +224,7 @@ if (!respondsToAlias) {
       
       
         <div class="nav-next">
-          <a href="/2017/01/02/2016-conclusion/" rel="prev">下一页 <span class="meta-arraw meta-arraw-right"></span></a>
+          <a href="/2017/01/02/2016-conclusion/" rel="prev">Newer Posts <span class="meta-arraw meta-arraw-right"></span></a>
         </div>
       
     </div>
@@ -307,7 +255,7 @@ if (!respondsToAlias) {
     </div>
     <div class="col-1-3">
       <aside>
-        <h1 class="widget-title">与我联系</h1>
+        <h1 class="widget-title">Contact</h1>
         <div class="widget-text">
           
             
@@ -325,7 +273,7 @@ if (!respondsToAlias) {
     </div>
     <div class="col-1-3">
       <aside>
-        <h1 class="widget-title">站内搜索</h1>
+        <h1 class="widget-title">Search</h1>
         <div class="widget-text">
           <form onSubmit="return appDaily.submitSearch('')">
             <p>
