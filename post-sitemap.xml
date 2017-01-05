@@ -37,7 +37,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/05/22/create-android-annotation-library/</loc>
+        <loc>https://geminiwen.xyz/2015/04/26/how-to-customize-view-one/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -45,7 +45,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/04/26/how-to-customize-view-one/</loc>
+        <loc>https://geminiwen.xyz/2015/05/22/create-android-annotation-library/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -133,14 +133,6 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/08/11/android-screen-lock/</loc>
-        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
         <loc>https://geminiwen.xyz/2015/08/04/about-skip-list/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -149,7 +141,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/09/28/android-cube-demo/</loc>
+        <loc>https://geminiwen.xyz/2015/08/11/android-screen-lock/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -158,6 +150,14 @@
 
     <url>
         <loc>https://geminiwen.xyz/2015/09/17/write-native-node-module/</loc>
+        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://geminiwen.xyz/2015/09/28/android-cube-demo/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -205,7 +205,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2016/01/07/android-programmer-learn-ios-1/</loc>
+        <loc>https://geminiwen.xyz/2015/12/01/mi-zhi-rxjava-4/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -213,7 +213,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/12/01/mi-zhi-rxjava-4/</loc>
+        <loc>https://geminiwen.xyz/2016/01/07/android-programmer-learn-ios-1/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -253,7 +253,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2016/06/14/websocket-protocol/</loc>
+        <loc>https://geminiwen.xyz/2016/04/28/coordinator-android-2/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -261,7 +261,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2016/04/28/coordinator-android-2/</loc>
+        <loc>https://geminiwen.xyz/2016/06/14/websocket-protocol/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
