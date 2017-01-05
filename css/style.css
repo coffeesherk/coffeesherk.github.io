@@ -1026,7 +1026,11 @@ pre {
       line-height: 1.5; }
   .archive .date {
     margin-right: 30px;
-    color: #7f8c8d; }
+    color: #7f8c8d;
+    vertical-align: top; }
+  .archive .title {
+    width: 78%;
+    display: inline-block; }
 
 #comment #ds-thread #ds-reset a.ds-like-thread-button {
   background-color: #fff;
