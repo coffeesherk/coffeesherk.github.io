@@ -7,8 +7,15 @@
     </url>
 
     <url>
+        <loc>https://geminiwen.xyz/categories/growth/</loc>
+        <lastmod>2017-01-03T01:37:07.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>https://geminiwen.xyz/categories/development/</loc>
-        <lastmod>2016-12-28T03:09:43.000Z</lastmod>
+        <lastmod>2017-01-05T07:26:56.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>

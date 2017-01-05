@@ -1,5 +1,5 @@
 html {
-  font-family: sans-serif;
+  font-family: "PT Sans", HelveticaNeue, "Helvetica Neue", Helvetica, Arial, "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%; }
 
@@ -268,7 +268,7 @@ h6 {
 
 p {
   margin: 1em 0;
-  line-height: 1.5; }
+  line-height: 1.9; }
 
 b,
 strong {
@@ -809,7 +809,7 @@ Footer
     z-index: 29; }
 
 .entry-content {
-  font-family: -apple-system, BlinkMacSystemFont,"Helvetica Neue","PingFang-SC-Regular","STHeiti", "Helvetica","Arial","Verdana","sans-serif","Microsoft YaHei";
+  font-family: "PT Sans", HelveticaNeue, "Helvetica Neue", Helvetica, Arial, "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   line-height: 1.7;
   word-wrap: break-word; }
   .entry-content ol,
@@ -818,9 +818,9 @@ Footer
   .entry-content ul {
     list-style: disc; }
   .entry-content blockquote {
-    color: #aaa;
+    color: #777;
     margin: 1em 0;
-    padding: 0 0 0 30px;
+    padding: 0 0 0 1rem;
     border-left: 4px solid #aaa; }
   .entry-content p img {
     display: block;

@@ -7,6 +7,22 @@
     </url>
 
     <url>
+        <loc>https://geminiwen.xyz/2017/01/05/aspects-read-source/</loc>
+        <lastmod>2017-01-05T07:26:56.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://geminiwen.xyz/2017/01/02/2016-conclusion/</loc>
+        <lastmod>2017-01-03T01:37:07.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
         <loc>https://geminiwen.xyz/2016/11/14/introduce-dagger2/</loc>
         <lastmod>2016-12-28T03:09:43.000Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -17,6 +33,14 @@
             <image:loc>https://geminiwen.xyz/2016/11/14/introduce-dagger2/dagger2.png</image:loc>
 
         </image:image>
+
+    </url>
+
+    <url>
+        <loc>https://geminiwen.xyz/2015/05/22/create-android-annotation-library/</loc>
+        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
 
     </url>
 
@@ -45,14 +69,6 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/05/22/create-android-annotation-library/</loc>
-        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
         <loc>https://geminiwen.xyz/2015/06/29/dynamic-load-crosswalk-library/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -62,6 +78,14 @@
 
     <url>
         <loc>https://geminiwen.xyz/2015/07/03/how-to-develop-android-one/</loc>
+        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://geminiwen.xyz/2015/07/06/android-studio-file-structure/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -85,7 +109,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/07/06/android-studio-file-structure/</loc>
+        <loc>https://geminiwen.xyz/2015/07/10/android-implements-swipeback/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -101,7 +125,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/07/10/android-implements-swipeback/</loc>
+        <loc>https://geminiwen.xyz/2015/07/31/about-tint/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -117,7 +141,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2015/07/31/about-tint/</loc>
+        <loc>https://geminiwen.xyz/2015/08/11/android-screen-lock/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -126,14 +150,6 @@
 
     <url>
         <loc>https://geminiwen.xyz/2015/09/17/write-native-node-module/</loc>
-        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
-        <loc>https://geminiwen.xyz/2015/08/11/android-screen-lock/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -229,14 +245,6 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2016/04/28/coordinator-android-2/</loc>
-        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
         <loc>https://geminiwen.xyz/2016/04/03/mi-zhi-rxjava-6/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -245,7 +253,7 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/2016/06/14/websocket-protocol/</loc>
+        <loc>https://geminiwen.xyz/2016/04/28/coordinator-android-2/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -254,6 +262,14 @@
 
     <url>
         <loc>https://geminiwen.xyz/2016/06/16/android-daynight-theme/</loc>
+        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>https://geminiwen.xyz/2016/06/14/websocket-protocol/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>

@@ -23,13 +23,6 @@
     </url>
 
     <url>
-        <loc>https://geminiwen.xyz/tags/ios/</loc>
-        <lastmod>2016-12-28T02:45:37.000Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>https://geminiwen.xyz/tags/protocol-websocket/</loc>
         <lastmod>2016-12-28T02:45:37.000Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -46,6 +39,20 @@
     <url>
         <loc>https://geminiwen.xyz/tags/android/</loc>
         <lastmod>2016-12-28T03:09:43.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://geminiwen.xyz/tags/growth/</loc>
+        <lastmod>2017-01-03T01:37:07.000Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>https://geminiwen.xyz/tags/ios/</loc>
+        <lastmod>2017-01-05T07:26:56.000Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
