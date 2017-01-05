@@ -194,16 +194,9 @@
   <!-- <h1 class="title">Comments</h1> -->
 
   
-  <div id="disqus_thread">
-    <script type="text/javascript">
-    var disqus_config = function () {
-          this.page.url = window.location.href;
-          this.page.identifier = 'post-how-to-develop-android-three';
-          this.page.title = '#土豆记事#教你开发Android App之 —— 真的开始写App了';
-      };
-    </script>
-    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-  </div>
+    <!-- 多说评论框 start -->
+    <div class="ds-thread" data-thread-key="post-how-to-develop-android-three" data-title="#土豆记事#教你开发Android App之 —— 真的开始写App了" data-url="https://geminiwen.xyz/2015/07/03/how-to-develop-android-three/"></div>
+    <!-- 多说评论框 end -->
   
 </section>
 
@@ -297,19 +290,18 @@
 <script src="/js/app.js"></script>
 <script type="text/javascript">
 
-  var disqus_shortname = 'gemini-blog';
+  <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 
-  
-  var disqus_url = 'https://geminiwen.xyz/2015/07/03/how-to-develop-android-three/';
-  
-
-  (function(){
-    var dsq = document.createElement('script');
-    dsq.type = 'text/javascript';
-    dsq.async = true;
-    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-  })();
+    var duoshuoQuery = {short_name:'geminiwen'};
+      (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+    <!-- 多说公共JS代码 end -->
 
 
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
